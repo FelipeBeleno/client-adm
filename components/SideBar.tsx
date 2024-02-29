@@ -15,9 +15,8 @@ const menus = [
     { name: "Usuarios", link: "/dashboard", icon: User }
 ];
 
-
 export const SideBar = () => {
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(false)
     return (
         <div className="flex">
             <div className={`${open ? 'xs:w-72 ' : 'w-0'} 
