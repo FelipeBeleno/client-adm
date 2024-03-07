@@ -1,8 +1,12 @@
-import { SideBar } from '@/components/SideBar'
-import { Button } from '@nextui-org/react'
+"use client"
+import ButtonAuth from "@/components/ButtonAuth";
 
 export default function Home() {
+
+
+
   return (
-    <SideBar />
+
+    <ButtonAuth />
   )
 }
