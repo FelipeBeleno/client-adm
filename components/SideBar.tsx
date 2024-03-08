@@ -1,17 +1,20 @@
 "use client"
-import { Avatar, Button, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react"
-import { FC, ReactNode, createElement, useState } from "react";
+import { Avatar, BreadcrumbItem, Breadcrumbs, Button, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Link } from "@nextui-org/react"
+import { FC, ReactNode, createElement, useEffect, useState } from "react";
 
 
-import { ArrowBendRightDown, BellSimple, ChartPie, Coffee, GlobeHemisphereWest, List, MagnifyingGlass, User } from "@phosphor-icons/react";
+import { ArrowBendRightDown, BellSimple, Buildings, ChartPie, Coffee, GlobeHemisphereWest, List, MagnifyingGlass, User } from "@phosphor-icons/react";
 import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 
 
 
 
 const menus = [
     { name: "Dashboard", link: "/dashboard", icon: ChartPie },
-    { name: "Usuarios", link: "/dashboard", icon: User }
+    { name: "Usuarios", link: "/user", icon: User },
+    { name: "Clientes", link: "/clients", icon: Buildings },
 ];
 
 type Props = {
@@ -20,8 +23,26 @@ type Props = {
 
 export const SideBar: FC<Props> = ({ children }) => {
     const [open, setOpen] = useState(false)
+    const pathname = usePathname()
 
     const { data: session } = useSession();
+
+    const [isActivate, setIsActivate] = useState({
+        name: "", link: ""
+    })
+
+
+    useEffect(() => {
+
+        let [act] = menus.filter(m => m.link === pathname)
+        setIsActivate({
+            link: act?.link,
+            name: act?.name
+        })
+
+    }, [])
+
+
 
 
     return (
@@ -53,12 +74,16 @@ export const SideBar: FC<Props> = ({ children }) => {
                     {
                         menus.map((m, i) => {
                             return !open
-                                ? <Button className="duration-300" key={i} isIconOnly variant="bordered" color="primary" aria-label={m.name}>
+                                ? <Link  key={i} href={m.link}><Button className="duration-300" key={i} isIconOnly variant={
+                                    isActivate.name === m.name ? "solid": "bordered"
+                                } color="primary" aria-label={m.name}>
                                     {createElement(m.icon)}
-                                </Button  >
-                                : <Button className="duration-300" key={i} fullWidth variant="bordered" color="primary" aria-label={m.name} startContent={createElement(m.icon)}>
+                                </Button  ></Link>
+                                : <Link className="w-full" key={i} href={m.link}><Button className="duration-300 w-full" key={i} fullWidth variant={
+                                    isActivate.name === m.name ? "solid": "bordered"
+                                } color="primary" aria-label={m.name} startContent={createElement(m.icon)}>
                                     {m.name}
-                                </Button>
+                                </Button></Link>
                         })
                     }
                 </div>
@@ -108,7 +133,7 @@ export const SideBar: FC<Props> = ({ children }) => {
                                     <DropdownItem key="new">New file</DropdownItem>
                                     <DropdownItem key="copy">Copy link</DropdownItem>
                                     <DropdownItem key="edit">Edit file</DropdownItem>
-                                    <DropdownItem  onClick={()=>signOut()} key="delete" className="text-danger" color="danger">
+                                    <DropdownItem onClick={() => signOut()} key="delete" className="text-danger" color="danger">
                                         Cierre de sesión
                                     </DropdownItem>
                                 </DropdownMenu>
@@ -123,6 +148,18 @@ export const SideBar: FC<Props> = ({ children }) => {
                 <div className="p-5 bg[rgb(250, 251, 251)]">
 
                     <div className="grid grid-cols-12 gap-5 w-full">
+                        <div className="col-span-12 flex flex-col  gap-5">
+                            <div>
+                                <h1 className="text-2xl font-black">{isActivate.name}</h1>
+                            </div>
+                            <div>
+                                <Breadcrumbs isDisabled>
+                                    <BreadcrumbItem>Inicio</BreadcrumbItem>
+                                    <BreadcrumbItem>{isActivate.name}</BreadcrumbItem>
+                                </Breadcrumbs>
+                            </div>
+                        </div>
+
 
                         {children}
 
