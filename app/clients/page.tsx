@@ -271,7 +271,7 @@ const ClientPage = () => {
                                     })}
                                 />
 
-                                <div className="col-span-4">
+                                <div className="xs:col-span-12 col-span-4">
                                     <FileUploader
                                         classes={{
                                             "drop_area": "bg-black"
