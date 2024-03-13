@@ -1,4 +1,4 @@
-import { File } from "buffer";
+
 
 export interface Client {
     name: string;
@@ -12,4 +12,37 @@ export interface Client {
     email: string;
     phone: string;
     address: string;
+    status: boolean
+}
+
+
+export interface ClientRowTable {
+    key: number;
+    image: any;
+    name: string;
+    email: string;
+    document: string;
+    status: string;
+
+}
+
+
+export interface ColumnTable {
+    key: string;
+    label: string
+}
+
+export interface ResponsePaginatedData {
+    columns: ColumnTable[];
+    rows: ClientRowTable[];
+    count: number;
+}
+
+export interface ResponseSelectClient {
+    image: string;
+
+    name: string;
+
+    _id: string;
+
 }

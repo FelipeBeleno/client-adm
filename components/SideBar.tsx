@@ -8,9 +8,6 @@ import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 
-
-
-
 const menus = [
     { name: "Dashboard", link: "/dashboard", icon: ChartPie },
     { name: "Usuarios", link: "/user", icon: User },
@@ -25,7 +22,7 @@ export const SideBar: FC<Props> = ({ children }) => {
     const [open, setOpen] = useState(false)
     const pathname = usePathname()
 
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
 
     const [isActivate, setIsActivate] = useState({
         name: "", link: ""
@@ -40,7 +37,7 @@ export const SideBar: FC<Props> = ({ children }) => {
             name: act?.name
         })
 
-    }, [])
+    }, [pathname])
 
 
 
@@ -74,13 +71,13 @@ export const SideBar: FC<Props> = ({ children }) => {
                     {
                         menus.map((m, i) => {
                             return !open
-                                ? <Link  key={i} href={m.link}><Button className="duration-300" key={i} isIconOnly variant={
-                                    isActivate.name === m.name ? "solid": "bordered"
+                                ? <Link key={i} href={m.link}><Button className="duration-300" key={i} isIconOnly variant={
+                                    isActivate.name === m.name ? "solid" : "bordered"
                                 } color="primary" aria-label={m.name}>
                                     {createElement(m.icon)}
                                 </Button  ></Link>
                                 : <Link className="w-full" key={i} href={m.link}><Button className="duration-300 w-full" key={i} fullWidth variant={
-                                    isActivate.name === m.name ? "solid": "bordered"
+                                    isActivate.name === m.name ? "solid" : "bordered"
                                 } color="primary" aria-label={m.name} startContent={createElement(m.icon)}>
                                     {m.name}
                                 </Button></Link>

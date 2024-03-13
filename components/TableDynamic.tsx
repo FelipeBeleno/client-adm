@@ -1,33 +1,23 @@
 "use client"
-import { Avatar, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, getKeyValue, user } from '@nextui-org/react'
-import React, { FC } from 'react'
+import { Paginate } from "@/interfaces/paginate";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Pagination, Avatar } from "@nextui-org/react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
 
 
 type Props = {
-
-    headers: string[];
-    items: any[]
+    rows: any[];
+    columns: any[];
+    paginate: {
+        limit: number;
+        offset: number;
+    },
+    setPaginate: Dispatch<SetStateAction<Paginate>>;
+    count: number;
 }
 
-const TableDynamic: FC<Props> = ({ headers, items }) => {
+const TableDynamic: FC<Props> = ({ rows, columns, paginate, setPaginate, count }) => {
 
-
-    const users = [
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'inactive' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'Active' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'inactive' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'Active' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'inactive' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'Active' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'inactive' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'Active' },
-        { name: 'Felipe', role: 'SUPER_ADMIN', status: 'inactive' }
-    ]
-
-    const [page, setPage] = React.useState(1);
-    const rowsPerPage = 4;
-
-    const pages = Math.ceil(users.length / rowsPerPage);
+    const [page, setPage] = useState(1)
 
     return (
         <Table
@@ -40,8 +30,15 @@ const TableDynamic: FC<Props> = ({ headers, items }) => {
                         showShadow
                         color="secondary"
                         page={page}
-                        total={pages}
-                        onChange={(page) => setPage(page)}
+                        total={Math.ceil(count / paginate.limit)}
+                        onChange={(page) => {
+
+                            setPaginate({
+                                ...paginate,
+                                offset: (page - 1) * paginate.limit
+                            })
+                            setPage(page)
+                        }}
                     />
                 </div>
             }
@@ -49,27 +46,22 @@ const TableDynamic: FC<Props> = ({ headers, items }) => {
                 wrapper: "min-h-[222px]",
             }}
         >
-            <TableHeader>
-                <TableColumn key="name">NAME</TableColumn>
-                <TableColumn key="role">ROLE</TableColumn>
-                <TableColumn key="status">STATUS</TableColumn>
+            <TableHeader columns={columns}>
+                {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
             </TableHeader>
-            <TableBody >
-                {users.map((it, i) => {
+            <TableBody items={rows}>
+                {(item) => (
+                    <TableRow key={item.key}>
+                        {(columnKey) => {
 
-                    return <TableRow key={it.name}>
 
-                        <TableCell className='flex gap-5 items-center'>
-                            <Avatar isBordered radius="lg"  src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-                            {it.name}
-
-                        </TableCell>
-                        <TableCell>hola</TableCell>
-                        <TableCell>hola</TableCell>
+                            if (columnKey === 'image') {
+                                return <TableCell><Avatar isBordered radius="sm" src={item.image} /></TableCell>
+                            }
+                            return <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                        }}
                     </TableRow>
-
-                })}
-
+                )}
             </TableBody>
         </Table>
     )

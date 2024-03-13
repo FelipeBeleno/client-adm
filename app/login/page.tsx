@@ -51,7 +51,6 @@ function LoginPage() {
 
         } catch (error) {
 
-            console.log(error)
 
             if (error instanceof AxiosError) {
                 let axiosError = error as AxiosError;
