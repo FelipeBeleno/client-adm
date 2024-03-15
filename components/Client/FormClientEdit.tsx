@@ -161,7 +161,7 @@ const FormClientEdit = () => {
                             value={c._id}
                             startContent={<Avatar
                                 isBordered radius="sm"
-                                alt="Brazil" className="w-6 h-6"
+                                alt="imagen" className="w-6 h-6"
                                 src={c.image}
                             />}
                         >

@@ -7,6 +7,7 @@ import { ArrowBendRightDown, BellSimple, Buildings, ChartPie, Coffee, GlobeHemis
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
+import Loader from "@/public/svgs/Loader";
 
 const menus = [
     { name: "Dashboard", link: "/dashboard", icon: ChartPie },
@@ -23,6 +24,8 @@ export const SideBar: FC<Props> = ({ children }) => {
     const pathname = usePathname()
 
     const { data: session, status } = useSession();
+
+    console.log(status, session)
 
     const [isActivate, setIsActivate] = useState({
         name: "", link: ""
@@ -42,7 +45,7 @@ export const SideBar: FC<Props> = ({ children }) => {
 
 
 
-    return (
+    return isActivate.name ?(
         <div className="flex">
             <div className={`${open ? 'xs:w-72 ' : 'w-0'} 
              ${open ? 'sm:w-72 ' : 'w-0'}
@@ -120,7 +123,7 @@ export const SideBar: FC<Props> = ({ children }) => {
                         <Divider style={{ height: '2.5rem' }} orientation="vertical" />
 
                         <div className="flex ">
-                            <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026704d" size="md" />
+                            <Avatar src={session?.user.image} size="md" />
                             <Dropdown>
                                 <DropdownTrigger>
                                     <Button endContent={<ArrowBendRightDown />} variant="light" >Hola,<b>{session?.user.name}</b> </Button>
@@ -169,5 +172,17 @@ export const SideBar: FC<Props> = ({ children }) => {
             </div>
 
         </div >
-    )
+    ):<div style={
+        {
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+
+        }
+    }>
+
+        <Loader />
+    </div>
 }
