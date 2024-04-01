@@ -4,16 +4,14 @@ import FormClientEdit from "@/components/Client/FormClientEdit";
 import TableDynamic from "@/components/TableDynamic";
 import { axiosInstance } from "@/config/axiosInstance";
 import { SnackProps } from "@/config/snackbar";
-import { Client, ResponsePaginatedData } from "@/interfaces/client";
+import {  ResponsePaginatedData } from "@/interfaces/client";
 import { Paginate } from "@/interfaces/paginate";
-import { Tabs, Tab, Card, CardBody, Input, Button, Select, SelectItem, Switch, Checkbox } from "@nextui-org/react";
-import { AxiosError, isAxiosError } from "axios";
-import { File } from "buffer";
+import { Tabs, Tab, Card, CardBody } from "@nextui-org/react";
+
 import { useSession } from "next-auth/react";
 import { enqueueSnackbar } from "notistack";
 import { useCallback, useEffect, useState } from "react";
-import { FileUploader } from "react-drag-drop-files";
-import { Controller, FieldValues, useForm } from "react-hook-form";
+
 
 
 const ClientPage = () => {
@@ -63,7 +61,8 @@ const ClientPage = () => {
     return (
         <div className="col-span-12">
             <Tabs aria-label="Options" variant="bordered" color="primary" size="lg" classNames={{
-                tabList: 'bg-white shadow'
+                tabList: 'bg-white shadow xs:flex-wrap w-full',
+                base:'w-full'
             }} >
                 <Tab title="Clientes">
                     <Card >

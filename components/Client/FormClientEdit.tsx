@@ -95,7 +95,6 @@ const FormClientEdit = () => {
                 rest["payRate"] = Number(rest["payRate"])
             }
 
-            console.log(typeof image)
 
 
             const response = await axiosInstance.post(`client/${clientSelected?._id}`, rest, {

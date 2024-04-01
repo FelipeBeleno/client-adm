@@ -3,16 +3,16 @@ import { Avatar, BreadcrumbItem, Breadcrumbs, Button, Divider, Dropdown, Dropdow
 import { FC, ReactNode, createElement, useEffect, useState } from "react";
 
 
-import { ArrowBendRightDown, BellSimple, Buildings, ChartPie, Coffee, GlobeHemisphereWest, List, MagnifyingGlass, User } from "@phosphor-icons/react";
+import { ArrowBendRightDown, BellSimple, Buildings, ChartPie, Coffee, GlobeHemisphereWest, List, MagnifyingGlass, User, PuzzlePiece } from "@phosphor-icons/react";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 import Loader from "@/public/svgs/Loader";
 
 const menus = [
     { name: "Dashboard", link: "/dashboard", icon: ChartPie },
-    { name: "Usuarios", link: "/user", icon: User },
+    { name: "Usuarios", link: "/users", icon: User },
     { name: "Clientes", link: "/clients", icon: Buildings },
+    { name: "Componentes", link: "/components", icon: PuzzlePiece },
 ];
 
 type Props = {
@@ -24,8 +24,6 @@ export const SideBar: FC<Props> = ({ children }) => {
     const pathname = usePathname()
 
     const { data: session, status } = useSession();
-
-    console.log(status, session)
 
     const [isActivate, setIsActivate] = useState({
         name: "", link: ""
@@ -45,7 +43,7 @@ export const SideBar: FC<Props> = ({ children }) => {
 
 
 
-    return isActivate.name ?(
+    return isActivate.name ? (
         <div className="flex">
             <div className={`${open ? 'xs:w-72 ' : 'w-0'} 
              ${open ? 'sm:w-72 ' : 'w-0'}
@@ -145,7 +143,7 @@ export const SideBar: FC<Props> = ({ children }) => {
 
                 </div>
 
-                <div className="p-5 bg[rgb(250, 251, 251)]">
+                <div className="px-5 bg[rgb(250, 251, 251)]">
 
                     <div className="grid grid-cols-12 gap-5 w-full">
                         <div className="col-span-12 flex flex-col  gap-5">
@@ -172,7 +170,7 @@ export const SideBar: FC<Props> = ({ children }) => {
             </div>
 
         </div >
-    ):<div style={
+    ) : <div style={
         {
             width: '100vw',
             height: '100vh',
