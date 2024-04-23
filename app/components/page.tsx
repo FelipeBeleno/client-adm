@@ -12,7 +12,7 @@ import { SnackProps } from "@/config/snackbar";
 import { axiosInstance } from "@/config/axiosInstance";
 import TableDynamic from "@/components/TableDynamic";
 
-const page = () => {
+const ComponentPage = () => {
 
 
     const { data: session } = useSession();
@@ -107,4 +107,4 @@ const page = () => {
     )
 }
 
-export default page
+export default ComponentPage;

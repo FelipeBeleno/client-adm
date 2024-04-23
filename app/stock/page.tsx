@@ -50,7 +50,8 @@ const StockPage = () => {
                         ...c,
                         option: () => <div style={{ display: 'flex', gap: 5 }}>
                             <Button isIconOnly color="primary" size='sm' onClick={() => {
-                                console.log(c.key)
+                                console.log(c.key, isOpen,
+                                    onOpen)
                                 onOpen()
                             }}><Eye /></Button>
 
@@ -79,7 +80,7 @@ const StockPage = () => {
 
     return (<>
         <Modal size='5xl' placement='top' isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior='inside'
-        
+
         >
             <ModalContent>
                 {(onClose) => (
