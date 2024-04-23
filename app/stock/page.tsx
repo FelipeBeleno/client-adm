@@ -53,12 +53,6 @@ const StockPage = () => {
                                 console.log(c.key)
                                 onOpen()
                             }}><Eye /></Button>
-                            <Button isIconOnly color="warning" size='sm' onClick={() => {
-                                console.log(c.key)
-                            }}>
-                                <Plus />
-                            </Button>
-
 
                         </div>
                     }
