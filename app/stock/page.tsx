@@ -15,6 +15,11 @@ const StockPage = () => {
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+    const [dataViewStock, setDataViewStock] = useState({
+        title: '',
+        componentId: '',
+    })
+
 
     const { data: session } = useSession();
 
@@ -50,8 +55,14 @@ const StockPage = () => {
                         ...c,
                         option: () => <div style={{ display: 'flex', gap: 5 }}>
                             <Button isIconOnly color="primary" size='sm' onClick={() => {
+
                                 console.log(c.key, isOpen,
                                     onOpen)
+
+                                setDataViewStock({
+                                    title: c.name,
+                                    componentId: c.key
+                                })
                                 onOpen()
                             }}><Eye /></Button>
 
@@ -75,6 +86,24 @@ const StockPage = () => {
         getValues()
     }, [])
 
+    const getInfoStock = useCallback(
+        async (componentId: string) => {
+            const { data } = await axiosInstance.get(`stock/${componentId}`, {
+                headers: {
+                    Authorization: session?.user.token
+                }
+            })
+
+        },
+        [],
+    );
+
+    useEffect(() => {
+        if (dataViewStock.componentId.length > 0) {
+            getInfoStock(dataViewStock.componentId)
+        }
+
+    }, [dataViewStock])
 
 
 
@@ -85,7 +114,7 @@ const StockPage = () => {
             <ModalContent>
                 {(onClose) => (
                     <>
-                        <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
+                        <ModalHeader className="flex flex-col gap-1">{dataViewStock.title}</ModalHeader>
                         <ModalBody >
                             <p>
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.

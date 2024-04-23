@@ -54,7 +54,7 @@ export interface ResponseSelectClient {
 }
 
 export interface StockRowTable {
-    key: number;
+    key: string;
     image: any;
     name: string;
     option: ()=> React.JSX.Element
