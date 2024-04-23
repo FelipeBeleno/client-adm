@@ -32,9 +32,15 @@ export interface ColumnTable {
     label: string
 }
 
+export interface ResponsePaginatedDataStock {
+    columns: ColumnTable[];
+    rows: StockRowTable[];
+    count: number;
+}
+
 export interface ResponsePaginatedData {
     columns: ColumnTable[];
-    rows: ClientRowTable[];
+    rows: ClientRowTable[] | ComponentRowTable[] 
     count: number;
 }
 
@@ -45,4 +51,19 @@ export interface ResponseSelectClient {
 
     _id: string;
 
+}
+
+export interface StockRowTable {
+    key: number;
+    image: any;
+    name: string;
+    option: ()=> React.JSX.Element
+}
+
+
+export interface ComponentRowTable {
+    key: number;
+    image: any;
+    name: string;
+    option: ()=> React.JSX.Element
 }

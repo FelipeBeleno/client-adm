@@ -1,7 +1,7 @@
 "use client"
 import { Paginate } from "@/interfaces/paginate";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Pagination, Avatar } from "@nextui-org/react";
-import { Dispatch, FC, SetStateAction, useState } from "react";
+import { Dispatch, FC, SetStateAction, createElement, useState } from "react";
 
 
 type Props = {
@@ -58,6 +58,12 @@ const TableDynamic: FC<Props> = ({ rows, columns, paginate, setPaginate, count }
                             if (columnKey === 'image') {
                                 return <TableCell><Avatar isBordered radius="sm" src={item.image} /></TableCell>
                             }
+
+                            if (columnKey === "option") {
+                                console.log(item.option)
+                                return <TableCell>{createElement(item.option)}</TableCell>
+                            };
+
                             return <TableCell>{getKeyValue(item, columnKey)}</TableCell>
                         }}
                     </TableRow>

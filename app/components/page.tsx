@@ -3,8 +3,70 @@ import { Tab, Tabs } from "@nextui-org/react"
 
 import FormComponent from "@/components/Component/FormComponent";
 import FormComponentEdit from "@/components/Component/FormComponentEdit";
+import { useCallback, useEffect, useState } from "react";
+import { Paginate } from "@/interfaces/paginate";
+import { ResponsePaginatedData } from "@/interfaces/client";
+import { useSession } from "next-auth/react";
+import { enqueueSnackbar } from "notistack";
+import { SnackProps } from "@/config/snackbar";
+import { axiosInstance } from "@/config/axiosInstance";
+import TableDynamic from "@/components/TableDynamic";
 
 const page = () => {
+
+
+    const { data: session } = useSession();
+
+
+    const [dataTable, setDataTable] = useState<ResponsePaginatedData>({
+        columns: [],
+        count: 0,
+        rows: []
+    })
+
+
+    const [paginate, setPaginate] = useState<Paginate>({
+        limit: 5,
+        offset: 0
+    })
+
+
+
+    const getData = useCallback(
+        async () => {
+            try {
+
+                const { data } = await axiosInstance.get<ResponsePaginatedData>(`component?limit=${paginate.limit}&offset=${paginate.offset}&clientId=${session?.user.clientId}`, {
+                    headers: {
+                        Authorization: session?.user.token
+                    }
+                })
+
+
+                data.rows = data.rows.map(c => {
+
+                    return {
+                        ...c,
+                        option: () => <h1>Hola</h1>
+                    }
+                })
+                setDataTable(data);
+
+            } catch (error) {
+
+                if (error) {
+                    enqueueSnackbar(error.toString(), SnackProps('error'))
+                }
+            }
+
+        },
+        [],
+    );
+
+    useEffect(() => {
+        getData()
+    }, [])
+
 
 
 
@@ -15,17 +77,29 @@ const page = () => {
                 base: 'w-full'
             }} >
 
-                <Tab title="Edicion de componente">
-                    <FormComponentEdit />
-                </Tab>
-
                 <Tab title="Componentes">
+                    {
+                        dataTable.columns.length > 0
+                            ? <TableDynamic
+                                setPaginate={setPaginate}
+                                paginate={paginate}
+                                columns={dataTable.columns}
+                                rows={dataTable.rows}
+                                key={dataTable.count}
+                                count={dataTable.count}
+                            />
+
+                            :null
+                    }
 
                 </Tab>
-
 
                 <Tab title="Nuevo componente">
                     <FormComponent />
+                </Tab>
+
+                <Tab title="Edicion de componente">
+                    <FormComponentEdit />
                 </Tab>
 
             </Tabs>

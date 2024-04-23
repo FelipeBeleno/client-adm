@@ -14,8 +14,6 @@ type Props = {
 
 const Providers: FC<Props> = ({ children }) => {
 
-
-
     return (
         <NextUIProvider>
             <SnackbarProvider>

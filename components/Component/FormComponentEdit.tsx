@@ -57,13 +57,13 @@ const FormComponentEdit = () => {
 
         try {
 
-            const response = await axiosInstance.post('component', rest, {
+            const response = await axiosInstance.post(`component/${component?._id}`, rest, {
                 headers: {
                     Authorization: session?.user.token
                 }
             })
 
-            if (response.data._id) {
+            if (response.data._id && typeof image !== "string") {
 
                 const formData = new FormData()
 
@@ -98,6 +98,20 @@ const FormComponentEdit = () => {
             enqueueSnackbar(error?.toString(), SnackProps('error'))
         }
     }
+
+    useEffect(() => {
+
+
+        if (component) {
+            let keys = Object.keys(component);
+            keys.forEach((u: any) => {
+
+                //@ts-ignore
+                setValue(u, component[u])
+            })
+        }
+
+    }, [component])
 
 
     return (
@@ -145,7 +159,7 @@ const FormComponentEdit = () => {
                                 className="col-span-12"
                                 label="Nombre"
                                 placeholder="Nombre de componente"
-
+                                defaultValue={component.name}
                                 isInvalid={errors.name ? true : false}
                                 errorMessage={errors.name?.message}
                                 {...register('name', {
@@ -159,6 +173,7 @@ const FormComponentEdit = () => {
                                 label="Descripción"
                                 placeholder="Descripción del componente"
                                 isInvalid={errors.description ? true : false}
+                                defaultValue={component.description}
                                 errorMessage={errors.description?.message}
                                 {...register('description', {
                                     required: 'Este campo es requerido',
@@ -178,11 +193,10 @@ const FormComponentEdit = () => {
                                     }}
                                     name="image"
                                     types={["jpeg", "png", "jpg"]}
-
                                 >
                                     <Input
                                         label="Imagen del componente"
-                                        placeholder={image?.name ? image?.name : 'Seleccione su imagen'}
+                                        placeholder={image?.name ? image?.name : component.image}
                                     />
                                 </FileUploader>
                             </div>
