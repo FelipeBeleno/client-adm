@@ -7,11 +7,11 @@ import { Dispatch, FC, SetStateAction, createElement, useState } from "react";
 type Props = {
     rows: any[];
     columns: any[];
-    paginate: {
+    paginate?: {
         limit: number;
         offset: number;
     },
-    setPaginate: Dispatch<SetStateAction<Paginate>>;
+    setPaginate?: Dispatch<SetStateAction<Paginate>>;
     count: number;
 }
 
@@ -24,22 +24,28 @@ const TableDynamic: FC<Props> = ({ rows, columns, paginate, setPaginate, count }
             aria-label="Example table with client side pagination"
             bottomContent={
                 <div className="flex w-full justify-center">
-                    <Pagination
-                        isCompact
-                        showControls
-                        showShadow
-                        color="secondary"
-                        page={page}
-                        total={Math.ceil(count / paginate.limit)}
-                        onChange={(page) => {
+                    {
+                        paginate && setPaginate
+                            ? <Pagination
+                                isCompact
+                                showControls
+                                showShadow
+                                color="secondary"
+                                page={page}
+                                total={Math.ceil(count / paginate.limit)}
+                                onChange={(page) => {
 
-                            setPaginate({
-                                ...paginate,
-                                offset: (page - 1) * paginate.limit
-                            })
-                            setPage(page)
-                        }}
-                    />
+                                    setPaginate({
+                                        ...paginate,
+                                        offset: (page - 1) * paginate.limit
+                                    })
+                                    setPage(page)
+                                }}
+                            />
+                            : null
+
+                    }
+
                 </div>
             }
             classNames={{
@@ -49,7 +55,7 @@ const TableDynamic: FC<Props> = ({ rows, columns, paginate, setPaginate, count }
             <TableHeader columns={columns}>
                 {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
             </TableHeader>
-            <TableBody items={rows}>
+            <TableBody emptyContent={"Sin registros"} items={rows}>
                 {(item) => (
                     <TableRow key={item.key}>
                         {(columnKey) => {
@@ -60,7 +66,6 @@ const TableDynamic: FC<Props> = ({ rows, columns, paginate, setPaginate, count }
                             }
 
                             if (columnKey === "option") {
-                                console.log(item.option)
                                 return <TableCell>{createElement(item.option)}</TableCell>
                             };
 

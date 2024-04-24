@@ -1,11 +1,13 @@
 "use client"
+import FormStock from '@/components/Stock/FormStock';
 import TableDynamic from '@/components/TableDynamic';
 import { axiosInstance } from '@/config/axiosInstance';
 import { SnackProps } from '@/config/snackbar';
-import { ResponsePaginatedData, ResponsePaginatedDataStock } from '@/interfaces/client';
+import { ResponsePaginatedDataStock, ResponsePaginatedDataStockDetail, StockComponentRowTable } from '@/interfaces/client';
 import { Paginate } from '@/interfaces/paginate';
 import { Button, Card, CardBody, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react'
 import { Eye, Plus } from '@phosphor-icons/react';
+import dayjs from 'dayjs';
 import { useSession } from 'next-auth/react';
 import { enqueueSnackbar } from 'notistack';
 import React, { useCallback, useEffect, useState } from 'react'
@@ -21,10 +23,18 @@ const StockPage = () => {
     })
 
 
+    const [newStockForm, setNewStockForm] = useState(false);
+
     const { data: session } = useSession();
 
 
     const [dataTable, setDataTable] = useState<ResponsePaginatedDataStock>({
+        columns: [],
+        count: 0,
+        rows: []
+    })
+
+    const [dataTableDetailStock, setDataTableDetailStock] = useState<ResponsePaginatedDataStockDetail>({
         columns: [],
         count: 0,
         rows: []
@@ -56,13 +66,11 @@ const StockPage = () => {
                         option: () => <div style={{ display: 'flex', gap: 5 }}>
                             <Button isIconOnly color="primary" size='sm' onClick={() => {
 
-                                console.log(c.key, isOpen,
-                                    onOpen)
-
                                 setDataViewStock({
                                     title: c.name,
                                     componentId: c.key
                                 })
+
                                 onOpen()
                             }}><Eye /></Button>
 
@@ -93,6 +101,16 @@ const StockPage = () => {
                     Authorization: session?.user.token
                 }
             })
+            data.rows = data.rows.map((c: StockComponentRowTable) => {
+                return {
+                    ...c,
+                    status: c.status ? 'Activo' : 'No Activo',
+                    dueDate: dayjs(c.dueDate).format('YYYY-MM-DD'),
+                    option: () => <div style={{ display: 'flex', gap: 5 }}><p>hola</p>
+                    </div>
+                }
+            })
+            setDataTableDetailStock(data)
 
         },
         [],
@@ -116,59 +134,31 @@ const StockPage = () => {
                     <>
                         <ModalHeader className="flex flex-col gap-1">{dataViewStock.title}</ModalHeader>
                         <ModalBody >
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nullam pulvinar risus non risus hendrerit venenatis.
-                                Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                            </p>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nullam pulvinar risus non risus hendrerit venenatis.
-                                Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                            </p>
-                            <p>
-                                Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
-                                dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
-                                Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
-                                Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
-                                proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                            </p>
 
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nullam pulvinar risus non risus hendrerit venenatis.
-                                Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                            </p>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nullam pulvinar risus non risus hendrerit venenatis.
-                                Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                            </p>
-                            <p>
-                                Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
-                                dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
-                                Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
-                                Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
-                                proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                            </p>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Button
+                                    onClick={() => {
+                                        setNewStockForm(!newStockForm);
+                                    }}
+                                    color="primary"
+                                    endContent={<Plus color='white' />}
+                                > Agregar </Button>
+                            </div>
+                            {
+                                newStockForm
+                                    ? <FormStock />
+                                    : null
+                            }
+                            {dataTableDetailStock.columns.length > 0
+                                ? <TableDynamic
 
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nullam pulvinar risus non risus hendrerit venenatis.
-                                Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                            </p>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nullam pulvinar risus non risus hendrerit venenatis.
-                                Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                            </p>
-                            <p>
-                                Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
-                                dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
-                                Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
-                                Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
-                                proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                            </p>
+                                    columns={dataTableDetailStock.columns}
+                                    rows={dataTableDetailStock.rows}
+                                    key={dataTableDetailStock.count}
+                                    count={dataTableDetailStock.count}
+                                />
+                                : <p>Make beautiful websites regardless of your design experience.</p>
+                            }
                         </ModalBody>
                         <ModalFooter>
                             <Button color="danger" variant="light" onPress={onClose}>

@@ -38,6 +38,22 @@ export interface ResponsePaginatedDataStock {
     count: number;
 }
 
+export interface StockComponentRowTable {
+    key: string;
+    stock: number;
+    value: number;
+    dueDate: Date;
+    status: boolean;
+    option: null
+}
+
+export interface ResponsePaginatedDataStockDetail{
+    columns: ColumnTable[];
+    rows: StockComponentRowTable[];
+    count: number;
+}
+
+
 export interface ResponsePaginatedData {
     columns: ColumnTable[];
     rows: ClientRowTable[] | ComponentRowTable[] 
