@@ -1,4 +1,5 @@
 "use client"
+import { FormEditStock } from '@/components/Stock/FormEditStock';
 import FormStock from '@/components/Stock/FormStock';
 import TableDynamic from '@/components/TableDynamic';
 import { axiosInstance } from '@/config/axiosInstance';
@@ -6,7 +7,7 @@ import { SnackProps } from '@/config/snackbar';
 import { ResponsePaginatedDataStock, ResponsePaginatedDataStockDetail, StockComponentRowTable } from '@/interfaces/client';
 import { Paginate } from '@/interfaces/paginate';
 import { Button, Card, CardBody, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from '@nextui-org/react'
-import { Eye, Plus } from '@phosphor-icons/react';
+import { Eraser, Eye, Plus } from '@phosphor-icons/react';
 import dayjs from 'dayjs';
 import { useSession } from 'next-auth/react';
 import { enqueueSnackbar } from 'notistack';
@@ -24,6 +25,17 @@ const StockPage = () => {
 
 
     const [newStockForm, setNewStockForm] = useState(false);
+
+    const [editStockForm, setEditStockForm] = useState(false);
+
+    const [stockData, setStockData] = useState<StockComponentRowTable>({
+        key: undefined,
+        stock: undefined,
+        value: undefined,
+        dueDate: undefined,
+        status: undefined,
+        option: undefined,
+    });
 
     const { data: session } = useSession();
 
@@ -106,7 +118,17 @@ const StockPage = () => {
                     ...c,
                     status: c.status ? 'Activo' : 'No Activo',
                     dueDate: dayjs(c.dueDate).format('YYYY-MM-DD'),
-                    option: () => <div style={{ display: 'flex', gap: 5 }}><p>hola</p>
+                    option: () => <div style={{ display: 'flex', gap: 5 }}>
+                        <Button isIconOnly color='secondary' onClick={() => {
+                            setEditStockForm(false)
+                            setTimeout(() => {
+                                setEditStockForm(true);
+                                setStockData({ ...c });
+                            }, 0);
+
+                        }}>
+                            <Eraser />
+                        </Button>
                     </div>
                 }
             })
@@ -126,9 +148,7 @@ const StockPage = () => {
 
 
     return (<>
-        <Modal size='5xl' placement='top' isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior='inside'
-
-        >
+        <Modal size='5xl' placement='center' isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior='inside'>
             <ModalContent>
                 {(onClose) => (
                     <>
@@ -146,9 +166,20 @@ const StockPage = () => {
                             </div>
                             {
                                 newStockForm
-                                    ? <FormStock />
+                                    ? <FormStock getValues={getValues} onOpenChange={onOpenChange} componentId={dataViewStock.componentId} />
                                     : null
                             }
+
+                            {
+                                editStockForm
+                                    ? <FormEditStock stockData={stockData}
+                                        onOpenChange={onOpenChange}
+                                        getValues={getValues}
+                                    />
+                                    : null
+
+                            }
+
                             {dataTableDetailStock.columns.length > 0
                                 ? <TableDynamic
 

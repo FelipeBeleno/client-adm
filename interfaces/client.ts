@@ -1,3 +1,4 @@
+import { CalendarDate } from "@internationalized/date";
 
 
 export interface Client {
@@ -39,12 +40,12 @@ export interface ResponsePaginatedDataStock {
 }
 
 export interface StockComponentRowTable {
-    key: string;
-    stock: number;
-    value: number;
-    dueDate: Date;
-    status: boolean;
-    option: null
+    key: string| undefined;
+    stock: number| undefined;
+    value: number| undefined;
+    dueDate: Date| undefined ;
+    status: boolean| undefined;
+    option: null| undefined
 }
 
 export interface ResponsePaginatedDataStockDetail{

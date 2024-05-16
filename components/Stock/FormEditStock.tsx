@@ -1,49 +1,52 @@
-import { axiosInstance } from '@/config/axiosInstance';
-import { SnackProps } from '@/config/snackbar';
-import { StockComponentRowTable } from '@/interfaces/client';
-import { parseDate } from '@internationalized/date';
-import { DatePicker } from "@nextui-org/date-picker";
-import { Button, Input } from '@nextui-org/react';
-import { FloppyDiskBack } from '@phosphor-icons/react';
-import { AxiosError, isAxiosError } from 'axios';
-import dayjs from 'dayjs';
-import { useSession } from 'next-auth/react';
-import { enqueueSnackbar } from 'notistack';
-import { FC } from 'react'
-import { Controller, FieldValues, useForm } from 'react-hook-form';
+import { axiosInstance } from "@/config/axiosInstance";
+import { SnackProps } from "@/config/snackbar";
+import { StockComponentRowTable } from "@/interfaces/client";
+import { parseDate } from "@internationalized/date";
+import { Button, DatePicker, Input } from "@nextui-org/react";
+import { FloppyDiskBack } from "@phosphor-icons/react";
+import { isAxiosError } from "axios";
+import dayjs from "dayjs";
+import { useSession } from "next-auth/react";
+import { enqueueSnackbar } from "notistack";
+import { FC } from "react";
+import { Controller, FieldValues, useForm } from "react-hook-form";
+
 
 type Props = {
-    componentId: string;
-    onOpenChange: (isOpen: boolean)=>void;
-    getValues: ()=>void;
+    stockData: StockComponentRowTable,
+    onOpenChange: (isOpen: boolean) => void;
+    getValues: () => void;
 }
 
-const FormStock: FC<Props> = ({ componentId, onOpenChange, getValues }) => {
+export const FormEditStock: FC<Props> = ({ stockData, onOpenChange, getValues }) => {
 
     const { data: session } = useSession();
 
-    const { register, handleSubmit, control, formState: { errors }, setValue } = useForm<StockComponentRowTable>({
+    const { register, handleSubmit, control, formState: { errors }, setValue } = useForm({
         defaultValues: {
-            dueDate: undefined,
-            stock: undefined,
-            value: undefined
+            dueDate: stockData.dueDate,
+            stock: stockData.stock,
+            value: stockData.value
         }
     });
 
+
+
     async function onSubmit(props: FieldValues) {
 
-
-
         let formData = {
-            ...props,
             stock: Number(props.stock),
             value: Number(props.value),
-            componentId,
-            clientId: session?.user.clientId
+            dueDate: props.dueDate,
+            clientId: session?.user.clientId,
+
         }
+
+
+
         try {
 
-            const response = await axiosInstance.post(`stock`, formData, {
+            const response = await axiosInstance.patch(`stock/${stockData.key}`, formData, {
                 headers: {
                     Authorization: session?.user.token
                 }
@@ -55,13 +58,15 @@ const FormStock: FC<Props> = ({ componentId, onOpenChange, getValues }) => {
         }
 
         catch (error) {
-            if(isAxiosError(error)){
+            if (isAxiosError(error)) {
+
                 enqueueSnackbar(error.response?.data.message.toString(), SnackProps("error"));
 
             }
         }
 
     }
+
 
     return (
         <form
@@ -104,21 +109,26 @@ const FormStock: FC<Props> = ({ componentId, onOpenChange, getValues }) => {
 
                             field.onChange(new Date(date.toString()))
                         }}
+                        defaultValue={parseDate(
+                            stockData.dueDate
+                                ?
+                                dayjs(stockData.dueDate).format("YYYY-MM-DD")
+                                : Date().toString()
+                        )}
                         isRequired
                         errorMessage={errors.value?.message}
                         className="xs:col-span-12 col-span-4"
                         label="Fecha de vencimiento"
                         isInvalid={errors.dueDate ? true : false}
-                        minValue={parseDate(dayjs(new Date()).format('YYYY-MM-DD'))}
+
                     />
                 )}
             />
             <Button
+
                 type='submit'
                 className="xs:col-span-12 col-span-4"
                 color='primary' endContent={<FloppyDiskBack />}> Guardar</Button>
         </form>
     )
 }
-
-export default FormStock
