@@ -3,7 +3,7 @@ import { Avatar, BreadcrumbItem, Breadcrumbs, Button, Divider, Dropdown, Dropdow
 import { FC, ReactNode, createElement, useEffect, useState } from "react";
 
 
-import { ArrowBendRightDown, BellSimple, Buildings, ChartPie, Coffee, GlobeHemisphereWest, List, MagnifyingGlass, User, PuzzlePiece, Warehouse } from "@phosphor-icons/react";
+import { ArrowBendRightDown, BellSimple, Buildings, ChartPie, Coffee, GlobeHemisphereWest, List, MagnifyingGlass, User, PuzzlePiece, Warehouse, Carrot } from "@phosphor-icons/react";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Loader from "@/public/svgs/Loader";
@@ -14,6 +14,7 @@ const menus = [
     { name: "Clientes", link: "/clients", icon: Buildings },
     { name: "Componentes", link: "/components", icon: PuzzlePiece },
     { name: "Stock", link: "/stock", icon: Warehouse },
+    { name: "Productos", link: "/products", icon: Carrot },
 ];
 
 type Props = {
@@ -46,7 +47,7 @@ export const SideBar: FC<Props> = ({ children }) => {
 
     return isActivate.name ? (
         <div className="flex">
-            
+
             <div className={`${open ? 'xs:w-72 ' : 'w-0'} 
              ${open ? 'sm:w-72 ' : 'w-0'}
              ${open ? 'md:w-72' : 'md:w-20'} 
