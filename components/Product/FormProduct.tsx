@@ -148,7 +148,7 @@ const FormProduct = () => {
                                 watch().components.length > 0
                                 ? watch().components.map((cm, i) => {
 
-                                    return <div>
+                                    return <div key={i}>
                                         <Badge
                                             content={i + 1}
                                             size="sm" color="secondary" >
