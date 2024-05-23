@@ -1,10 +1,11 @@
 "use client"
 import FormProduct from "@/components/Product/FormProduct";
+import FormProductEdit from "@/components/Product/FormProductEdit";
 import { Tab, Tabs } from "@nextui-org/react";
 
 const ProductPage = () => {
 
-    
+
 
     return (
 
@@ -18,7 +19,7 @@ const ProductPage = () => {
                 </Tab>
 
                 <Tab title="Productos">
-                    <h1>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ad quia molestias quidem fugit a asperiores ipsum laboriosam, est, commodi delectus odio veritatis cum animi tempora adipisci exercitationem cupiditate soluta corrupti?</h1>
+                    <FormProductEdit />
                 </Tab>
             </Tabs>
         </div>

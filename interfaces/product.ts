@@ -1,12 +1,12 @@
 export interface Product {
     name: string;
     description: string;
-    image?: File;
+    image?: string| File;
     components: component[];
     value: number;
     clientId: string;
+    _id?: string
 }
-
 
 export interface component {
     componentId: string;

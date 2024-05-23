@@ -2,21 +2,27 @@ import { axiosInstance } from "@/config/axiosInstance";
 import { SnackProps } from "@/config/snackbar";
 import { ComponentResponse } from "@/interfaces/component";
 import { Product } from "@/interfaces/product";
-import { Avatar, Badge, Button, ButtonGroup, Card, CardBody, Checkbox, CheckboxGroup, Input, Select, SelectItem, Textarea } from "@nextui-org/react"
+import { Avatar, Badge, Button, ButtonGroup, Card, CardBody, Checkbox, CheckboxGroup, Divider, Input, Select, SelectItem, Textarea } from "@nextui-org/react"
 import { Minus, Plus } from "@phosphor-icons/react";
 import { isAxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { enqueueSnackbar } from "notistack";
-import { ChangeEventHandler, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import { Controller, FieldValues, useForm } from "react-hook-form"
 
-const FormProduct = () => {
+const FormProductEdit = () => {
 
 
     const { data: session } = useSession();
 
     const [components, setComponents] = useState<ComponentResponse[]>([])
+
+    const [image, setImage] = useState<File>();
+
+    const [products, setProducts] = useState<Product[]>([])
+
+    const [product, setProduct] = useState<Product | undefined>(undefined)
 
 
     const getInfoComponents = useCallback(
@@ -30,13 +36,29 @@ const FormProduct = () => {
         [],
     );
 
+    const getAllProducts = useCallback(
+        async () => {
+
+            const { data } = await axiosInstance.get<Product[]>(`product/${session?.user.clientId}`, {
+
+                headers: {
+                    Authorization: session?.user.token
+
+                }
+            })
+
+            setProducts(data)
+
+        },
+        [],
+    )
+
+
     useEffect(() => {
         getInfoComponents();
+        getAllProducts();
     }, [])
 
-
-
-    const [image, setImage] = useState<File>();
 
     const { register, handleSubmit, control, formState: { errors }, setValue, watch, reset } = useForm<Product>({
         defaultValues: {
@@ -51,18 +73,17 @@ const FormProduct = () => {
 
     async function onSubmit(props: FieldValues) {
 
-        
         let { image, ...rest } = props;
 
         try {
 
-            const response = await axiosInstance.post('product', {...rest, value:  Number(rest.value)}, {
+            const response = await axiosInstance.patch(`product/${product?._id}`, { ...rest, value: Number(rest.value) }, {
                 headers: {
                     Authorization: session?.user.token
                 }
             })
 
-            if (response.data._id) {
+            if (response.data._id && typeof image !== "string") {
 
                 const formData = new FormData()
 
@@ -76,8 +97,10 @@ const FormProduct = () => {
                 })
                 if (uploadImage.data) {
 
-                    enqueueSnackbar('Producto creado con exito', SnackProps('success'))
+                    enqueueSnackbar('Producto actualizado con exito', SnackProps('success'))
+
                     reset()
+                    setProduct(undefined)
                     return
                 } else {
                     throw new Error()
@@ -85,8 +108,10 @@ const FormProduct = () => {
 
             }
 
-            enqueueSnackbar('Producto creado con exito', SnackProps('success'))
+            enqueueSnackbar('Producto actualizado con exito', SnackProps('success'))
+
             reset()
+            setProduct(undefined)
 
             return
 
@@ -113,9 +138,66 @@ const FormProduct = () => {
 
     }
 
+
+
+    useEffect(() => {
+
+
+        if (product) {
+            console.log(product)
+            let keys = Object.keys(product);
+            keys.forEach((u: any) => {
+
+                //@ts-ignore
+                setValue(u, product[u])
+            })
+        }
+
+    }, [product])
+
     return (
         <Card>
             <CardBody>
+
+
+                <Select
+                    className="max-w-xs xs:w-full"
+                    label="Seleccione el producto"
+                    onChange={e => {
+                        setProduct(undefined)
+                        setImage(undefined)
+                        setTimeout(() => {
+                            const [us] = products?.filter(c => c._id === e.target.value)
+                            setProduct(us);
+                        }, 0);
+                    }}
+                >
+
+
+
+                    {
+                        Array.isArray(products)
+                            ?
+                            products.map((c) => {
+                                return <SelectItem
+                                    key={c._id ? c._id : c.name}
+                                    value={c._id}
+                                    startContent={<Avatar
+                                        isBordered radius="sm"
+                                        alt="imagen" className="w-6 h-6"
+                                        src={c.image?.toString()}
+                                    />}
+                                >
+                                    {c.name}
+                                </SelectItem>
+                            })
+                            : <></>
+
+                    }
+
+                </Select>
+                <Divider className="my-5" />
+
                 <form className="grid grid-cols-12 gap-5" onSubmit={handleSubmit(onSubmit)}>
 
                     <Input
@@ -168,6 +250,7 @@ const FormProduct = () => {
                                 <CheckboxGroup
                                     label="Seleccione los componentes"
                                     isRequired
+                                    value={product?.components.map(p => p.componentId)}
                                     onValueChange={v => {
 
                                         let valu = v.map(val => {
@@ -208,12 +291,12 @@ const FormProduct = () => {
                                 ? watch().components.map((cm, i) => {
 
                                     return <div key={i} className="flex justify-center flex-col items-center gap-1">
-                                        
+
                                         <Badge
                                             content={cm.stockRequired}
-                                            size="sm" color="secondary" 
+                                            size="sm" color="secondary"
                                             shape="rectangle"
-                                            >
+                                        >
                                             <Avatar
                                                 radius="md"
                                                 src={cm.image}
@@ -228,7 +311,7 @@ const FormProduct = () => {
                                                 onClick={() => sumValue(-1, i)}
                                             ><Minus /></Button>
                                         </ButtonGroup>
-                                        
+
                                     </div>
                                 })
                                 : null
@@ -243,7 +326,7 @@ const FormProduct = () => {
                             handleChange={(e: File) => {
 
                                 setImage(e)
-                               // setValue("image", e)
+                                setValue("image", e)
                             }}
                             name="image"
                             types={["jpeg", "png", "jpg"]}
@@ -251,7 +334,7 @@ const FormProduct = () => {
                         >
                             <Input
                                 label="Imagen del producto"
-                                placeholder={image?.name ? image?.name : 'Seleccione su imagen'}
+                                placeholder={image?.name ? image.name : product?.image?.toString() ? product?.image?.toString() : 'Seleccione su imagen'}
                             />
                         </FileUploader>
                     </div>
@@ -265,4 +348,4 @@ const FormProduct = () => {
     )
 }
 
-export default FormProduct
+export default FormProductEdit;
