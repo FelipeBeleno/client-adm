@@ -1,7 +1,7 @@
 export interface Product {
     name: string;
     description: string;
-    image?: string| File;
+    image?: string | File;
     components: component[];
     value: number;
     clientId: string;
@@ -12,5 +12,10 @@ export interface component {
     componentId: string;
     name: string;
     stockRequired: number;
-    image: string|undefined;
+    image: string | undefined;
+}
+
+
+export interface ProductSelected extends Product {
+    selected: boolean;
 }
