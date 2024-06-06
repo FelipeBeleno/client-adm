@@ -18,4 +18,5 @@ export interface component {
 
 export interface ProductSelected extends Product {
     selected: boolean;
+    quantity: number;
 }
