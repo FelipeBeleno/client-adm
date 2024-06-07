@@ -1,7 +1,7 @@
 "use client"
 import { axiosInstance } from '@/config/axiosInstance'
 import { ProductSelected } from '@/interfaces/product'
-import { Accordion, AccordionItem, Button, ButtonGroup, Card, CardBody, CardHeader, Chip, Image, Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, User } from '@nextui-org/react'
+import { Accordion, AccordionItem, Button, ButtonGroup, Card, CardBody, CardHeader, Chip, Divider, Image, Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, User } from '@nextui-org/react'
 import { MagnifyingGlass, Minus, Plus } from '@phosphor-icons/react'
 import { useSession } from 'next-auth/react'
 import { Fragment, useCallback, useEffect, useState } from 'react'
@@ -13,8 +13,8 @@ const SalesPage = () => {
   const columns = [
     { name: "Producto", uid: "name" },
     { name: "Cantidad", uid: "quantity" },
-    { name: "Precio C/U", uid: "status" },
-    { name: "Total", uid: "actions" },
+    { name: "Precio C/U", uid: "value" },
+    { name: "Total", uid: "valueTotal" },
   ];
 
   const renderCell = useCallback((product: any, columnKey: any, index: any, array: any[] | ProductSelected[]) => {
@@ -38,9 +38,9 @@ const SalesPage = () => {
             <Button isIconOnly color="primary"
               onClick={() => {
                 let arr = [...array];
-                console.log(arr)
 
                 arr[index].quantity += 1
+                arr[index].valueTotal = arr[index].quantity * arr[index].value
                 setProductsSelected(arr);
 
               }}
@@ -49,16 +49,15 @@ const SalesPage = () => {
             <Button isIconOnly color="primary"
               onClick={() => {
                 let arr = [...array];
-                console.log(arr)
 
                 arr[index].quantity -= 1
+                arr[index].valueTotal = arr[index].quantity * arr[index].value
+
                 setProductsSelected(arr);
 
               }}
             ><Minus /></Button>
           </ButtonGroup>
-
-
         );
 
       default:
@@ -81,7 +80,7 @@ const SalesPage = () => {
         }
       });
 
-      let dataFinal = data.map(d => ({ ...d, selected: false, quantity: 1 }))
+      let dataFinal = data.map(d => ({ ...d, selected: false, quantity: 1, valueTotal: d.value }))
       setProducts(dataFinal)
     }, [],
   )
@@ -115,6 +114,11 @@ const SalesPage = () => {
   }, [products])
 
 
+  function sumValues() {
+    return productsSelected.reduce((pr, cv) => {
+      return pr + cv.valueTotal
+    }, 0)
+  }
 
 
 
@@ -172,10 +176,9 @@ const SalesPage = () => {
           </div>
         </AccordionItem>
         <AccordionItem key="2" aria-label="Accordion 2" title="Detalle de producto">
-          <div className='p-5'>
+          <div className='p-5 gap-5 flex flex-col'>
 
-
-            <Table aria-label="Example table with custom cells">
+            <Table removeWrapper aria-label="Example table with custom cells">
               <TableHeader columns={columns}>
                 {(column) => (
                   <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"}>
@@ -200,10 +203,37 @@ const SalesPage = () => {
 
 
             </Table>
+
+
+            <Card>
+              <CardHeader >
+                <h1>Resumen del pedido</h1>
+              </CardHeader>
+              <CardBody>
+                <div className='flex flex-col gap-3'>
+                  <div className='flex flex-row justify-between'>
+                    <span>Sub Total</span>
+                    <span>$ {sumValues()}</span>
+                  </div>
+                  <Divider />
+
+                  <div className='flex flex-row justify-between'>
+                    <span>Envio</span>
+                    <span>Free</span>
+                  </div>
+                  <Divider />
+
+                  <div className='flex flex-row justify-between'>
+                    <span>Total</span>
+                    <span>$ {sumValues()}</span>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
           </div>
 
         </AccordionItem>
-        <AccordionItem key="3" aria-label="Accordion 3" title="Accordion 3">
+        <AccordionItem key="3" aria-label="Accordion 3" title="Confirmación">
           <p>hola</p>
         </AccordionItem>
       </Accordion>
