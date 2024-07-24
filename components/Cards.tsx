@@ -171,6 +171,7 @@ const Cards = () => {
                     </Card>
                 </div>
 
+
                 <div className="w-full sx:col-span-12 sm:col-span-12 md:col-span-6 lg:col-span-3 xl:col-span-3 2xl:col-span-3 col-span-12">
                     <Card className="flex flex-col justify-between bg-secondary text-white p-5 rounded-3xl shadow-2xl h-full">
                         <CardHeader className="pb-0 pt-2 px-4 flex-row flex-wrap justify-between items-center text-lg font-bold">
