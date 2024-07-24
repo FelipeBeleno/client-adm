@@ -34,7 +34,6 @@ const TableDynamic: FC<Props> = ({ rows, columns, paginate, setPaginate, count }
                                 page={page}
                                 total={Math.ceil(count / paginate.limit)}
                                 onChange={(page) => {
-
                                     setPaginate({
                                         ...paginate,
                                         offset: (page - 1) * paginate.limit

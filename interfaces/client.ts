@@ -1,4 +1,3 @@
-import { CalendarDate } from "@internationalized/date";
 
 
 export interface Client {

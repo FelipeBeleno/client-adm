@@ -7,7 +7,7 @@ type variantType = "info" | "default" | "error" | "success" | "warning" | undefi
 const variantDefault = 'info'
 
 
-export const SnackProps = (variant: variantType = variantDefault, duration: number = 2000): OptionsObject => {
+export const SnackProps = (variant: variantType = variantDefault, duration: number = 2500): OptionsObject => {
 
     return {
         variant,

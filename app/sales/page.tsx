@@ -1,13 +1,23 @@
 "use client"
+import SaleTable from '@/components/Sale/SaleTable'
+import UserSale from '@/components/Sale/UserSale'
+import TableDynamic from '@/components/TableDynamic'
 import { axiosInstance } from '@/config/axiosInstance'
+import { SnackProps } from '@/config/snackbar'
+import { Paginate } from '@/interfaces/paginate'
 import { ProductSelected } from '@/interfaces/product'
-import { Accordion, AccordionItem, Button, ButtonGroup, Card, CardBody, CardHeader, Chip, Divider, Image, Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, User } from '@nextui-org/react'
-import { MagnifyingGlass, Minus, Plus } from '@phosphor-icons/react'
+import { Accordion, AccordionItem, Button, ButtonGroup, Card, CardBody, CardHeader, Divider, Image, Input, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, User } from '@nextui-org/react'
+import { Eye, MagnifyingGlass, Minus, Plus } from '@phosphor-icons/react'
 import { useSession } from 'next-auth/react'
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { enqueueSnackbar } from 'notistack'
+import { useCallback, useEffect, useState } from 'react'
+
+
 
 const SalesPage = () => {
 
+
+  const { data: session } = useSession();
 
 
   const columns = [
@@ -65,10 +75,10 @@ const SalesPage = () => {
     }
   }, []);
 
-  const { data: session } = useSession();
 
   const [products, setProducts] = useState<ProductSelected[]>([])
   const [productsSelected, setProductsSelected] = useState<ProductSelected[] | any[]>([])
+
 
   const getProducts = useCallback(
     async () => {
@@ -85,8 +95,13 @@ const SalesPage = () => {
     }, [],
   )
 
+
+
+
+
   useEffect(() => {
     getProducts()
+
   }, [])
 
   useEffect(() => {
@@ -114,6 +129,7 @@ const SalesPage = () => {
   }, [products])
 
 
+
   function sumValues() {
     return productsSelected.reduce((pr, cv) => {
       return pr + cv.valueTotal
@@ -123,120 +139,144 @@ const SalesPage = () => {
 
 
 
+
   return (
     <div className="col-span-12">
 
-      <Accordion variant="splitted">
-        <AccordionItem key="1" aria-label="Accordion 1" title="Productos">
-          <div className='p-5'>
-            <Input startContent={
-              <MagnifyingGlass />
-            }
-              placeholder='Busca tu producto'
-            />
-          </div>
-          <div className='grid grid-cols-12 gap-5 p-5'>
 
-            {
-              products.length > 0
-                ? products.map((p, i, arr) => {
-                  return <Card
-                    key={i}
-                    onPress={() => {
+      <Tabs aria-label="Options" variant="bordered" color="primary" size="lg" classNames={{
+        tabList: 'bg-white shadow xs:flex-wrap  w-full',
+        base: 'w-full'
+      }} >
+        <Tab title="Ventas">
 
-                      let arrF = [...arr];
+          <SaleTable />
 
-                      arrF[i].selected = !arrF[i].selected
+        </Tab>
 
-                      setProducts(arrF)
-                    }}
-                    isPressable
-                    className={`py-4 col-span-3 xs:col-span-12 sm:col-span-6  md:col-span-4 lg:col-span-4 shadow-lg ${p.selected ? 'shadow-secondary' : ''} `}>
-                    <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-                      <p className="text-tiny uppercase font-bold">{p.name}</p>
-                      <small className="text-default-500">{p.description}</small>
-                      <h4 className="font-bold text-large">{p.value}</h4>
-                    </CardHeader>
-                    <CardBody className="overflow-visible py-2">
-                      <Image
-                        isZoomed
-                        alt="Card background"
-                        className="object-cover rounded-xl h-[300px]"
-                        src={p.image?.toString()}
+        <Tab title="Nueva Venta">
+          <Accordion 
+           itemClasses={{
+            trigger: "bg-white  rounded-lg px-2 py-0 h-14 flex items-center",
+            content: "bg-white",
+            
+            
+          }}  >
+            <AccordionItem key="1" aria-label="Accordion 1" title="Productos">
+              <div className='p-5'>
+                <Input startContent={
+                  <MagnifyingGlass />
+                }
+                  placeholder='Busca tu producto'
+                />
+              </div>
+              <div className='grid grid-cols-12 gap-5 p-5'>
 
+                {
+                  products.length > 0
+                    ? products.map((p, i, arr) => {
+                      return <Card
+                        key={i}
+                        onPress={() => {
 
-                      />
-                    </CardBody>
-                  </Card>
+                          let arrF = [...arr];
 
-                })
-                : <span>No hay productos registardos</span>
-            }
+                          arrF[i].selected = !arrF[i].selected
 
-          </div>
-        </AccordionItem>
-        <AccordionItem key="2" aria-label="Accordion 2" title="Detalle de producto">
-          <div className='p-5 gap-5 flex flex-col'>
-
-            <Table removeWrapper aria-label="Example table with custom cells">
-              <TableHeader columns={columns}>
-                {(column) => (
-                  <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"}>
-                    {column.name}
-                  </TableColumn>
-                )}
-              </TableHeader>
+                          setProducts(arrF)
+                        }}
+                        isPressable
+                        className={`py-4 col-span-3 xs:col-span-12 sm:col-span-6  md:col-span-4 lg:col-span-4 shadow-lg ${p.selected ? 'shadow-secondary' : ''} `}>
+                        <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                          <p className="text-tiny uppercase font-bold">{p.name}</p>
+                          <small className="text-default-500">{p.description}</small>
+                          <h4 className="font-bold text-large">{p.value}</h4>
+                        </CardHeader>
+                        <CardBody className="overflow-visible py-2">
+                          <Image
+                            isZoomed
+                            alt="Card background"
+                            className="object-cover rounded-xl h-[300px]"
+                            src={p.image?.toString()}
 
 
-              {
-                productsSelected.length > 0
-                  ? <TableBody >
-                    {
-                      productsSelected.map((product, i, array) => <TableRow key={product._id}>
-                        {(columnKey) => <TableCell>{renderCell(product, columnKey, i, array)}</TableCell>}
-                      </TableRow>
-                      )
-                    }
-                  </TableBody>
-                  : <TableBody emptyContent={"No rows to display."}>{[]}</TableBody>
-              }
+                          />
+                        </CardBody>
+                      </Card>
+
+                    })
+                    : <span>No hay productos registardos</span>
+                }
+
+              </div>
+            </AccordionItem>
+            <AccordionItem key="2" aria-label="Accordion 2" title="Detalle de producto">
+              <div className='p-5 gap-5 flex flex-col'>
+
+                <Table removeWrapper aria-label="Example table with custom cells">
+                  <TableHeader columns={columns}>
+                    {(column) => (
+                      <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"}>
+                        {column.name}
+                      </TableColumn>
+                    )}
+                  </TableHeader>
 
 
-            </Table>
+                  {
+                    productsSelected.length > 0
+                      ? <TableBody >
+                        {
+                          productsSelected.map((product, i, array) => <TableRow key={product._id}>
+                            {(columnKey) => <TableCell>{renderCell(product, columnKey, i, array)}</TableCell>}
+                          </TableRow>
+                          )
+                        }
+                      </TableBody>
+                      : <TableBody emptyContent={"No rows to display."}>{[]}</TableBody>
+                  }
 
 
-            <Card>
-              <CardHeader >
-                <h1>Resumen del pedido</h1>
-              </CardHeader>
-              <CardBody>
-                <div className='flex flex-col gap-3'>
-                  <div className='flex flex-row justify-between'>
-                    <span>Sub Total</span>
-                    <span>$ {sumValues()}</span>
-                  </div>
-                  <Divider />
+                </Table>
 
-                  <div className='flex flex-row justify-between'>
-                    <span>Envio</span>
-                    <span>Free</span>
-                  </div>
-                  <Divider />
 
-                  <div className='flex flex-row justify-between'>
-                    <span>Total</span>
-                    <span>$ {sumValues()}</span>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          </div>
+                <Card>
+                  <CardHeader >
+                    <h1>Resumen del pedido</h1>
+                  </CardHeader>
+                  <CardBody>
+                    <div className='flex flex-col gap-3'>
+                      <div className='flex flex-row justify-between'>
+                        <span>Sub Total</span>
+                        <span>$ {sumValues()}</span>
+                      </div>
+                      <Divider />
 
-        </AccordionItem>
-        <AccordionItem key="3" aria-label="Accordion 3" title="Confirmación">
-          <p>hola</p>
-        </AccordionItem>
-      </Accordion>
+                      <div className='flex flex-row justify-between'>
+                        <span>Envio</span>
+                        <span>Free</span>
+                      </div>
+                      <Divider />
+
+                      <div className='flex flex-row justify-between'>
+                        <span>Total</span>
+                        <span>$ {sumValues()}</span>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+
+            </AccordionItem>
+            <AccordionItem key="3" aria-label="Accordion 3" title="Confirmación">
+              <UserSale productsSelected={productsSelected} sumValues={sumValues} />
+            </AccordionItem>
+          </Accordion>
+        </Tab>
+      </Tabs>
+
+
+
 
     </div>
   )
