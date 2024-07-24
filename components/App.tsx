@@ -2,8 +2,6 @@ import { useSession } from "next-auth/react";
 import { FC, ReactNode, useEffect } from "react";
 import { SideBar } from "./SideBar";
 import { Ring } from "@uiball/loaders";
-import { Modal, ModalBody } from "@nextui-org/react";
-// import Loader from "@/public/svgs/Loader"; // Asegúrate de que este componente funcione correctamente
 
 type Props = {
     children: ReactNode
@@ -26,9 +24,22 @@ const App: FC<Props> = ({ children }) => {
                 justifyContent: 'center',
                 alignItems: 'center',
             }}>
-                {/* Reemplaza temporalmente el Loader con un simple texto o componente de carga */}
-                {/* <Loader /> */}
                 <Ring size={40} lineWeight={5} speed={2} color="black" />
+                <p>Loading...</p>
+            </div>
+        );
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <div style={{
+                width: '100vw',
+                height: '100vh',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}>
+                <p>User is not authenticated.</p>
             </div>
         );
     }
