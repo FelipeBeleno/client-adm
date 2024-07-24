@@ -10,37 +10,39 @@ type Props = {
 }
 
 const App: FC<Props> = ({ children }) => {
-
     const { data: session, status } = useSession();
 
-
+    useEffect(() => {
+        if (status === 'loading') {
+            console.log('Loading session...');
+        } else if (!session) {
+            console.log('No session available.');
+        }
+    }, [session, status]);
 
     if (status === 'loading') {
-        return <div style={
-            {
+        return (
+            <div style={{
                 width: '100vw',
                 height: '100vh',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-
-            }
-        }>
-
-            <Loader />
-        </div>
+            }}>
+                <Loader />
+            </div>
+        );
     }
 
     if (!session) {
-        return <>{children}</>
+        return <>{children}</>;
     }
 
     return (
-
         <SideBar>
             {children}
         </SideBar>
-    )
-}
+    );
+};
 
 export default App
