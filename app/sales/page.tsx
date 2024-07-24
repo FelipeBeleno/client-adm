@@ -156,12 +156,7 @@ const SalesPage = () => {
 
         <Tab title="Nueva Venta">
           <Accordion 
-           itemClasses={{
-            trigger: "bg-white  rounded-lg px-2 py-0 h-14 flex items-center",
-            content: "bg-white",
-            
-            
-          }}  >
+               variant="splitted">
             <AccordionItem key="1" aria-label="Accordion 1" title="Productos">
               <div className='p-5'>
                 <Input startContent={
