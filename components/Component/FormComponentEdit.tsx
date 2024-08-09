@@ -9,11 +9,15 @@ import { axiosInstance } from "@/config/axiosInstance";
 import { isAxiosError } from "axios";
 import { enqueueSnackbar } from "notistack";
 import { SnackProps } from "@/config/snackbar";
+import { useDispatch } from "react-redux";
+import { loaderOff, loaderOn } from "@/redux/slices/laoderSlice";
 
 
 const FormComponentEdit = () => {
 
 
+
+    const dispatch = useDispatch();
     const { data: session } = useSession();
 
     const [image, setImage] = useState<File>();
@@ -33,7 +37,7 @@ const FormComponentEdit = () => {
 
     const getDataComponents = useCallback(
         async () => {
-
+            dispatch(loaderOn());
             const { data } = await axiosInstance.get<ComponentResponse[]>(`component/${session?.user.clientId}`, {
                 headers: {
                     Authorization: session?.user.token
@@ -41,6 +45,7 @@ const FormComponentEdit = () => {
             })
 
             setComponents(data);
+            dispatch(loaderOff());
         },
         [],
     );
@@ -52,7 +57,7 @@ const FormComponentEdit = () => {
 
 
     async function onSubmit(props: FieldValues) {
-
+        dispatch(loaderOn());
         let { image, ...rest } = props;
 
         try {
@@ -78,25 +83,31 @@ const FormComponentEdit = () => {
                 if (uploadImage.data) {
 
                     enqueueSnackbar('Componente creado con exito', SnackProps('success'))
+                    dispatch(loaderOff());
                     return
                 } else {
+                    dispatch(loaderOff());
                     throw new Error()
                 }
 
-            }
 
+
+            }
+            dispatch(loaderOff());
             enqueueSnackbar('Componente creado con exito', SnackProps('success'))
 
             return
 
         } catch (error) {
             if (isAxiosError(error)) {
-
                 enqueueSnackbar(error.response?.data.message, SnackProps('error'))
+                dispatch(loaderOff());
                 return
             }
             enqueueSnackbar(error?.toString(), SnackProps('error'))
+            dispatch(loaderOff());
         }
+        dispatch(loaderOff());
     }
 
     useEffect(() => {
@@ -120,7 +131,7 @@ const FormComponentEdit = () => {
 
                 <Select
                     className="max-w-xs xs:w-full"
-                    label="Seleccione el usuario"
+                    label="Seleccione el componente"
                     onChange={e => {
                         setComponent(undefined)
                         setImage(undefined)

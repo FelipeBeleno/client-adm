@@ -9,9 +9,12 @@ import { axiosInstance } from "@/config/axiosInstance";
 import { isAxiosError } from "axios";
 import { enqueueSnackbar } from "notistack";
 import { SnackProps } from "@/config/snackbar";
+import { useDispatch } from "react-redux";
+import { loaderOff, loaderOn } from "@/redux/slices/laoderSlice";
 
 const FormComponent = () => {
 
+    const dispatch = useDispatch();
 
     const { data: session } = useSession();
 
@@ -27,6 +30,8 @@ const FormComponent = () => {
 
 
     async function onSubmit(props: FieldValues) {
+
+        dispatch(loaderOn());
 
         let { image, ...rest } = props;
 
@@ -53,25 +58,29 @@ const FormComponent = () => {
                 if (uploadImage.data) {
 
                     enqueueSnackbar('Componente creado con exito', SnackProps('success'))
+                    dispatch(loaderOff());
                     return
                 } else {
+                    dispatch(loaderOff());
                     throw new Error()
                 }
 
             }
-
+            dispatch(loaderOff());
             enqueueSnackbar('Componente creado con exito', SnackProps('success'))
 
             return
 
         } catch (error) {
             if (isAxiosError(error)) {
-
+                dispatch(loaderOff());
                 enqueueSnackbar(error.response?.data.message, SnackProps('error'))
                 return
             }
             enqueueSnackbar(error?.toString(), SnackProps('error'))
+            dispatch(loaderOff());
         }
+        dispatch(loaderOff());
     }
 
     return (

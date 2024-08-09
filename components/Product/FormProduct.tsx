@@ -2,17 +2,21 @@ import { axiosInstance } from "@/config/axiosInstance";
 import { SnackProps } from "@/config/snackbar";
 import { ComponentResponse } from "@/interfaces/component";
 import { Product } from "@/interfaces/product";
+import { loaderOff, loaderOn } from "@/redux/slices/laoderSlice";
 import { Avatar, Badge, Button, ButtonGroup, Card, CardBody, Checkbox, CheckboxGroup, Input, Select, SelectItem, Textarea } from "@nextui-org/react"
 import { Minus, Plus } from "@phosphor-icons/react";
 import { isAxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { enqueueSnackbar } from "notistack";
-import { ChangeEventHandler, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import { Controller, FieldValues, useForm } from "react-hook-form"
+import { useDispatch } from "react-redux";
 
 const FormProduct = () => {
 
+
+    const dispatch = useDispatch();
 
     const { data: session } = useSession();
 
@@ -21,11 +25,11 @@ const FormProduct = () => {
 
     const getInfoComponents = useCallback(
         async () => {
-
+            dispatch(loaderOn());
             const { data } = await axiosInstance.get<ComponentResponse[]>(`component/${session?.user.clientId}`);
 
             setComponents(data)
-
+            dispatch(loaderOff());
         },
         [],
     );
@@ -51,12 +55,12 @@ const FormProduct = () => {
 
     async function onSubmit(props: FieldValues) {
 
-        
+        dispatch(loaderOn());
         let { image, ...rest } = props;
 
         try {
 
-            const response = await axiosInstance.post('product', {...rest, value:  Number(rest.value)}, {
+            const response = await axiosInstance.post('product', { ...rest, value: Number(rest.value) }, {
                 headers: {
                     Authorization: session?.user.token
                 }
@@ -66,6 +70,7 @@ const FormProduct = () => {
 
                 const formData = new FormData()
 
+
                 formData.append('image', props['image']);
                 formData.append('id', response.data._id);
 
@@ -74,18 +79,22 @@ const FormProduct = () => {
                         Authorization: session?.user.token
                     }
                 })
+
                 if (uploadImage.data) {
 
                     enqueueSnackbar('Producto creado con exito', SnackProps('success'))
                     reset()
+                    dispatch(loaderOff());
                     return
                 } else {
+                    dispatch(loaderOff());
                     throw new Error()
                 }
 
             }
 
             enqueueSnackbar('Producto creado con exito', SnackProps('success'))
+            dispatch(loaderOff());
             reset()
 
             return
@@ -94,11 +103,14 @@ const FormProduct = () => {
             if (isAxiosError(error)) {
 
                 enqueueSnackbar(error.response?.data.message, SnackProps('error'))
+                dispatch(loaderOff());
                 return
             }
             enqueueSnackbar(error?.toString(), SnackProps('error'))
+            dispatch(loaderOff());
         }
 
+        dispatch(loaderOff());
     }
 
 
@@ -150,6 +162,7 @@ const FormProduct = () => {
                         className="col-span-12"
                         label="Valor"
                         placeholder="Valor del producto"
+                        type="number"
 
                         isInvalid={errors.value ? true : false}
                         errorMessage={errors.value?.message}
@@ -208,12 +221,12 @@ const FormProduct = () => {
                                 ? watch().components.map((cm, i) => {
 
                                     return <div key={i} className="flex justify-center flex-col items-center gap-1">
-                                        
+
                                         <Badge
                                             content={cm.stockRequired}
-                                            size="sm" color="secondary" 
+                                            size="sm" color="secondary"
                                             shape="rectangle"
-                                            >
+                                        >
                                             <Avatar
                                                 radius="md"
                                                 src={cm.image}
@@ -228,7 +241,7 @@ const FormProduct = () => {
                                                 onClick={() => sumValue(-1, i)}
                                             ><Minus /></Button>
                                         </ButtonGroup>
-                                        
+
                                     </div>
                                 })
                                 : null
@@ -243,7 +256,7 @@ const FormProduct = () => {
                             handleChange={(e: File) => {
 
                                 setImage(e)
-                               // setValue("image", e)
+                                setValue("image", e)
                             }}
                             name="image"
                             types={["jpeg", "png", "jpg"]}
@@ -257,7 +270,7 @@ const FormProduct = () => {
                     </div>
 
 
-                    <Button type="submit" color="primary">Send</Button>
+                    <Button type="submit" color="primary">Guardar</Button>
                 </form>
             </CardBody>
 

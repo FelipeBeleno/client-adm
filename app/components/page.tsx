@@ -1,5 +1,5 @@
 "use client"
-import { Tab, Tabs } from "@nextui-org/react"
+import { Button, Tab, Tabs } from "@nextui-org/react"
 
 import FormComponent from "@/components/Component/FormComponent";
 import FormComponentEdit from "@/components/Component/FormComponentEdit";
@@ -11,6 +11,7 @@ import { enqueueSnackbar } from "notistack";
 import { SnackProps } from "@/config/snackbar";
 import { axiosInstance } from "@/config/axiosInstance";
 import TableDynamic from "@/components/TableDynamic";
+import { Trash } from "@phosphor-icons/react";
 
 const ComponentPage = () => {
 
@@ -47,7 +48,7 @@ const ComponentPage = () => {
 
                     return {
                         ...c,
-                        option: () => <h1>Hola</h1>
+                        option: () => <Button isIconOnly color="danger"><Trash /></Button>
                     }
                 })
                 setDataTable(data);
@@ -89,7 +90,7 @@ const ComponentPage = () => {
                                 count={dataTable.count}
                             />
 
-                            :null
+                            : null
                     }
 
                 </Tab>

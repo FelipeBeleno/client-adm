@@ -2,6 +2,7 @@ import { axiosInstance } from "@/config/axiosInstance";
 import { SnackProps } from "@/config/snackbar";
 import { ComponentResponse } from "@/interfaces/component";
 import { Product } from "@/interfaces/product";
+import { loaderOff, loaderOn } from "@/redux/slices/laoderSlice";
 import { Avatar, Badge, Button, ButtonGroup, Card, CardBody, Checkbox, CheckboxGroup, Divider, Input, Select, SelectItem, Textarea } from "@nextui-org/react"
 import { Minus, Plus } from "@phosphor-icons/react";
 import { isAxiosError } from "axios";
@@ -10,10 +11,13 @@ import { enqueueSnackbar } from "notistack";
 import { useCallback, useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import { Controller, FieldValues, useForm } from "react-hook-form"
+import { useDispatch } from "react-redux";
 
 const FormProductEdit = () => {
 
 
+
+    const dispatch = useDispatch()
     const { data: session } = useSession();
 
     const [components, setComponents] = useState<ComponentResponse[]>([])
@@ -28,9 +32,12 @@ const FormProductEdit = () => {
     const getInfoComponents = useCallback(
         async () => {
 
+            dispatch(loaderOn());
             const { data } = await axiosInstance.get<ComponentResponse[]>(`component/${session?.user.clientId}`);
 
             setComponents(data)
+            dispatch(loaderOff());
+
 
         },
         [],
@@ -38,7 +45,7 @@ const FormProductEdit = () => {
 
     const getAllProducts = useCallback(
         async () => {
-
+            dispatch(loaderOn());
             const { data } = await axiosInstance.get<Product[]>(`product/${session?.user.clientId}`, {
 
                 headers: {
@@ -48,6 +55,7 @@ const FormProductEdit = () => {
             })
 
             setProducts(data)
+            dispatch(loaderOff())
 
         },
         [],
@@ -73,6 +81,7 @@ const FormProductEdit = () => {
 
     async function onSubmit(props: FieldValues) {
 
+        dispatch(loaderOn());
         let { image, ...rest } = props;
 
         try {
@@ -101,8 +110,10 @@ const FormProductEdit = () => {
 
                     reset()
                     setProduct(undefined)
+                    dispatch(loaderOff())
                     return
                 } else {
+                    dispatch(loaderOff())
                     throw new Error()
                 }
 
@@ -112,18 +123,21 @@ const FormProductEdit = () => {
 
             reset()
             setProduct(undefined)
-
+            dispatch(loaderOff())
             return
 
         } catch (error) {
             if (isAxiosError(error)) {
 
                 enqueueSnackbar(error.response?.data.message, SnackProps('error'))
+                dispatch(loaderOff())
                 return
             }
             enqueueSnackbar(error?.toString(), SnackProps('error'))
+            dispatch(loaderOff())
         }
 
+        dispatch(loaderOff())
     }
 
 
@@ -232,7 +246,7 @@ const FormProductEdit = () => {
                         className="col-span-12"
                         label="Valor"
                         placeholder="Valor del producto"
-
+                        type="number"
                         isInvalid={errors.value ? true : false}
                         errorMessage={errors.value?.message}
                         {...register('value', {

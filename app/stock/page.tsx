@@ -99,12 +99,12 @@ const StockPage = () => {
                 }
             }
         },
-        [],
+        [paginate],
     )
 
     useEffect(() => {
         getValues()
-    }, [])
+    }, [paginate])
 
     const getInfoStock = useCallback(
         async (componentId: string) => {
@@ -193,11 +193,9 @@ const StockPage = () => {
                         </ModalBody>
                         <ModalFooter>
                             <Button color="danger" variant="light" onPress={onClose}>
-                                Close
+                                Cerrar
                             </Button>
-                            <Button color="primary" onPress={onClose}>
-                                Action
-                            </Button>
+
                         </ModalFooter>
                     </>
                 )}

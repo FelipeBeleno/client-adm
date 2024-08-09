@@ -7,10 +7,15 @@ import { enqueueSnackbar } from 'notistack'
 import { SnackProps } from '@/config/snackbar'
 import { Paginate } from '@/interfaces/paginate'
 import { useSession } from 'next-auth/react'
+import { useDispatch } from 'react-redux'
+import { loaderOff, loaderOn } from '@/redux/slices/laoderSlice'
 
 const SaleTable = () => {
 
     const { data: session } = useSession();
+
+
+    const dispatch = useDispatch();
 
 
     const [dataTable, setDataTable] = useState({
@@ -30,6 +35,7 @@ const SaleTable = () => {
             if (!session) return;
 
             try {
+                dispatch(loaderOn());
                 const { data } = await axiosInstance.get(`sale?limit=${paginate.limit}&offset=${paginate.offset}&clientId=${session?.user.clientId}`, {
                     headers: {
                         Authorization: session?.user.token
@@ -43,14 +49,17 @@ const SaleTable = () => {
                             <Button isIconOnly color="primary" size='sm' onClick={async () => {
 
                                 await getPdf(c.codeSale)
+
                             }}><Eye /></Button>
                         </div>
                     }
                 })
                 setDataTable(data);
+                dispatch(loaderOff());
             } catch (error) {
                 if (error) {
                     enqueueSnackbar(error.toString(), SnackProps('error'))
+                    dispatch(loaderOff());
                 }
             }
         },
@@ -69,7 +78,7 @@ const SaleTable = () => {
 
 
     async function getPdf(codeSale: string) {
-
+        dispatch(loaderOn());
         const response = await axiosInstance.post('sale/pdf', { code: codeSale }, {
             headers: {
                 Authorization: session?.user.token
@@ -83,6 +92,7 @@ const SaleTable = () => {
         document.body.appendChild(a);
         a.click();
         a.remove();
+        dispatch(loaderOff());
     }
 
 

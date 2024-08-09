@@ -59,7 +59,7 @@ const SalesPage = () => {
             <Button isIconOnly color="primary"
               onClick={() => {
                 let arr = [...array];
-
+                if (arr[index].quantity == 1) return
                 arr[index].quantity -= 1
                 arr[index].valueTotal = arr[index].quantity * arr[index].value
 
@@ -155,16 +155,21 @@ const SalesPage = () => {
         </Tab>
 
         <Tab title="Nueva Venta">
-          <Accordion 
-               variant="splitted">
+          <Accordion
+            variant="splitted">
             <AccordionItem key="1" aria-label="Accordion 1" title="Productos">
-              <div className='p-5'>
+
+              {
+                /*
+  <div className='p-5'>
                 <Input startContent={
                   <MagnifyingGlass />
                 }
                   placeholder='Busca tu producto'
                 />
               </div>
+                */
+              }
               <div className='grid grid-cols-12 gap-5 p-5'>
 
                 {
@@ -187,11 +192,11 @@ const SalesPage = () => {
                           <small className="text-default-500">{p.description}</small>
                           <h4 className="font-bold text-large">{p.value}</h4>
                         </CardHeader>
-                        <CardBody className="overflow-visible py-2">
+                        <CardBody className="overflow-visible py-2 items-center">
                           <Image
                             isZoomed
                             alt="Card background"
-                            className="object-cover rounded-xl h-[300px]"
+                            className="object-cover rounded-xl h-[300px] w-[300px]"
                             src={p.image?.toString()}
 
 

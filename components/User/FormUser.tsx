@@ -2,319 +2,334 @@ import { axiosInstance } from "@/config/axiosInstance";
 import { SnackProps } from "@/config/snackbar";
 import { ResponseSelectClient } from "@/interfaces/client";
 import { User } from "@/interfaces/user";
-import { Avatar, Button, Card, CardBody, Input, Select, SelectItem, Switch } from "@nextui-org/react"
+import { loaderOff, loaderOn } from "@/redux/slices/laoderSlice";
+import {
+  Avatar,
+  Button,
+  Card,
+  CardBody,
+  Input,
+  Select,
+  SelectItem,
+  Switch,
+} from "@nextui-org/react";
 import { isAxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { enqueueSnackbar } from "notistack";
 import { useCallback, useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
-import { Controller, FieldValues, useForm } from "react-hook-form"
-
+import { Controller, FieldValues, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 
 const FormUser = () => {
+  const { data: session } = useSession();
 
-    const { data: session } = useSession();
+  const [clientes, setClientes] = useState<ResponseSelectClient[]>([]);
 
+  const dispatch = useDispatch();
 
-    const [clientes, setClientes] = useState<ResponseSelectClient[]>([])
-
-    const getData = useCallback(
-        async () => {
-    
-          const { data } = await axiosInstance.get<ResponseSelectClient[]>('client/select', {
-            headers: {
-              Authorization: session?.user.token
-            }
-          });
-          setClientes(data)
+  const getData = useCallback(async () => {
+    if (session?.user.token === undefined) {
+      return;
+    }
+    dispatch(loaderOn());
+    const { data } = await axiosInstance.get<ResponseSelectClient[]>(
+      "client/select",
+      {
+        headers: {
+          Authorization: session?.user.token,
         },
-        [],
-      )
-    
-      useEffect(() => {
-        getData()
-      }, [])
+      }
+    );
+    setClientes(data);
+    dispatch(loaderOff());
+  }, [session?.user.token]);
 
-    const { register, handleSubmit, control, formState: { errors }, setValue } = useForm<User>({
-        defaultValues: {
-            name: "",
-            documentType: "",
-            document: "",
-            role: "",
-            email: "",
-            clientId: "",
-            image: "",
-            status: false,
-        }
-    });
+  useEffect(() => {
+    getData();
+  }, [session?.user.token]);
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    setValue,
+  } = useForm<User>({
+    defaultValues: {
+      name: "",
+      documentType: "",
+      document: "",
+      role: "",
+      email: "",
+      clientId: "",
+      image: "",
+      status: false,
+    },
+  });
 
-    
   const [image, setImage] = useState<File>();
 
-
   async function onSubmit(props: FieldValues) {
+    dispatch(loaderOn());
     let { image, ...rest } = props;
 
-
     try {
-
-      const response = await axiosInstance.post('user', rest, {
+      const response = await axiosInstance.post("user", rest, {
         headers: {
-          Authorization: session?.user.token
-        }
-      })
-
-
+          Authorization: session?.user.token,
+        },
+      });
 
       if (response.data._id) {
+        const formData = new FormData();
 
-        const formData = new FormData()
+        formData.append("image", props["image"]);
+        formData.append("id", response.data._id);
 
-        formData.append('image', props['image']);
-        formData.append('id', response.data._id);
-
-        const uploadImage = await axiosInstance.post('user/image', formData, {
+        const uploadImage = await axiosInstance.post("user/image", formData, {
           headers: {
-            Authorization: session?.user.token
-          }
-        })
+            Authorization: session?.user.token,
+          },
+        });
+
         if (uploadImage.data) {
-
-          enqueueSnackbar('Usuario creado con exito', SnackProps('success'))
-          return
+          enqueueSnackbar("Usuario creado con exito", SnackProps("success"));
+          dispatch(loaderOff());
+          return;
         } else {
-          throw new Error()
+          dispatch(loaderOff());
+          throw new Error();
         }
-
-
       }
-
-
+      dispatch(loaderOff());
     } catch (error) {
       if (isAxiosError(error)) {
-
-        enqueueSnackbar(error.response?.data.message, SnackProps('error'))
-        return
+        enqueueSnackbar(error.response?.data.message, SnackProps("error"));
+        dispatch(loaderOff());
+        return;
       }
-      enqueueSnackbar(error?.toString(), SnackProps('error'))
+      dispatch(loaderOff());
+      enqueueSnackbar(error?.toString(), SnackProps("error"));
     }
-
-
   }
 
-    return (
-        <Card >
-            <CardBody>
-                <form className="grid grid-cols-12 gap-5" onSubmit={handleSubmit(onSubmit)}>
-
-                    <Controller
-                        name="clientId"
-                        control={control}
-                        rules={
-                            {
-                                required: 'Este campo es requerido'
-                            }
+  return (
+    <Card>
+      <CardBody>
+        <form
+          className="grid grid-cols-12 gap-5"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <Controller
+            name="clientId"
+            control={control}
+            rules={{
+              required: "Este campo es requerido",
+            }}
+            render={({ field }) =>
+              clientes.length > 0 ? (
+                <Select
+                  isInvalid={errors.clientId ? true : false}
+                  errorMessage={errors.clientId?.message}
+                  label="Seleccione el cliente"
+                  className="xs:col-span-12 col-span-4"
+                  {...field}
+                >
+                  {clientes.map((c) => {
+                    return (
+                      <SelectItem
+                        key={c._id}
+                        value={c._id}
+                        startContent={
+                          <Avatar
+                            isBordered
+                            radius="sm"
+                            alt="Brazil"
+                            className="w-6 h-6"
+                            src={c.image}
+                          />
                         }
-                        render={({ field }) => clientes.length > 0 ? (
+                      >
+                        {c.name}
+                      </SelectItem>
+                    );
+                  })}
+                </Select>
+              ) : (
+                <></>
+              )
+            }
+          />
 
-                            <Select
-                                isInvalid={errors.clientId ? true : false}
-                                errorMessage={errors.clientId?.message}
-                                label="Seleccione el cliente"
-                                className="xs:col-span-12 col-span-4"
-                                {...field}
-                            >
-                                {
-                                    clientes.map((c) => {
-                                        return <SelectItem
-                                            key={c._id}
-                                            value={c._id}
-                                            startContent={<Avatar
-                                                isBordered radius="sm"
-                                                alt="Brazil" className="w-6 h-6"
-                                                src={c.image}
-                                            />}
-                                        >
-                                            {c.name}
-                                        </SelectItem>
-                                    })
-                                }
+          <Input
+            className="xs:col-span-12 col-span-4"
+            label="Nombre"
+            isInvalid={errors.name ? true : false}
+            errorMessage={errors.name?.message}
+            placeholder="Joe Doe"
+            {...register("name", {
+              required: "Este campo es requerido",
+              minLength: 3,
+            })}
+          />
 
+          <Controller
+            name="documentType"
+            control={control}
+            rules={{
+              required: "Este campo es requerido",
+            }}
+            render={({ field }) => (
+              <Select
+                isInvalid={errors.documentType ? true : false}
+                errorMessage={errors.documentType?.message}
+                label="Seleccione el tipo de documento"
+                placeholder="NIT"
+                className="xs:col-span-12 col-span-4"
+                {...field}
+              >
+                <SelectItem
+                  value={"CEDULA DE CIUDADANIA"}
+                  key={"CEDULA DE CIUDADANIA"}
+                >
+                  CEDULA DE CIUDADANIA
+                </SelectItem>
+                <SelectItem
+                  value={"CEDULA EXTRANGERIA"}
+                  key={"CEDULA EXTRANGERIA"}
+                >
+                  CEDULA EXTRANGERIA
+                </SelectItem>
+                <SelectItem value={"NIT"} key={"NIT"}>
+                  NIT
+                </SelectItem>
+              </Select>
+            )}
+          />
 
+          <Input
+            className="xs:col-span-12 col-span-4"
+            label="Número"
+            placeholder="1019098727"
+            type="number"
+            isInvalid={errors.document ? true : false}
+            errorMessage={errors.document?.message}
+            {...register("document", {
+              required: "Este campo es requerido",
+              minLength: {
+                value: 5,
+                message: "El campo debe tener como minimo 5 carateres",
+              },
+              maxLength: {
+                value: 12,
+                message: "El campo debe tener como maximo 12 caracteres",
+              },
+            })}
+          />
 
-                            </Select>
+          <Controller
+            name="role"
+            control={control}
+            rules={{
+              required: "Este campo es requerido",
+            }}
+            render={({ field }) => (
+              <Select
+                isInvalid={errors.role ? true : false}
+                errorMessage={errors.role?.message}
+                label="Rol"
+                placeholder="Seleccione el rol"
+                className="xs:col-span-12 col-span-4"
+                {...field}
+              >
+                <SelectItem value={"SUPER_ADMIN"} key={"SUPER_ADMIN"}>
+                  SUPER ADMINISTRADOR
+                </SelectItem>
+                <SelectItem value={"ADMIN"} key={"ADMIN"}>
+                  ADMINISTRADOR
+                </SelectItem>
+                <SelectItem value={"USER"} key={"USER"}>
+                  USUARIO
+                </SelectItem>
+              </Select>
+            )}
+          />
 
-                        ) : <></>}
-                    />
+          <Input
+            className="xs:col-span-12 col-span-4"
+            label="Email"
+            placeholder="joedoe@mail.com"
+            type="text"
+            isInvalid={errors.email ? true : false}
+            errorMessage={errors.email?.message}
+            {...register("email", {
+              required: "Este campo es requerido",
+              pattern: {
+                value: /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
+                message: "El campo debe ser un email valido",
+              },
+            })}
+          />
+          <Input
+            className="xs:col-span-12 col-span-4"
+            label="Teléfono"
+            placeholder="601 6586263"
+            type="text"
+            isInvalid={errors.phone ? true : false}
+            errorMessage={errors.phone?.message}
+            {...register("phone", {
+              required: "Este campo es requerido",
+              minLength: {
+                value: 7,
+                message: "se debe tener por lo menos 7 caracteres",
+              },
+              maxLength: {
+                value: 12,
+                message: "se debe tener maximo 12 caracteres",
+              },
+            })}
+          />
 
+          <div className="xs:col-span-12 col-span-4">
+            <FileUploader
+              classes={{
+                drop_area: "bg-black",
+              }}
+              handleChange={(e: File) => {
+                setImage(e);
+                setValue("image", e);
+              }}
+              name="image"
+              types={["jpeg", "png", "jpg"]}
+            >
+              <Input
+                label="Foto de perfil"
+                placeholder={image?.name ? image?.name : "Seleccione su imagen"}
+              />
+            </FileUploader>
+          </div>
 
-                    <Input
-                        className="xs:col-span-12 col-span-4"
-                        label="Nombre"
-                        isInvalid={errors.name ? true : false}
-                        errorMessage={errors.name?.message}
-                        placeholder="Joe Doe"
-                        {...register('name', {
-                            required: 'Este campo es requerido',
-                            minLength: 3
-                        })}
-                    />
+          <div className="xs:col-span-12 col-span-4">
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                //@ts-ignore
+                <Switch {...field} defaultSelected={true}>
+                  Estado
+                </Switch>
+              )}
+            />
+          </div>
 
+          <Button className="col-span-12" type="submit" color="primary">
+            Enviar
+          </Button>
+        </form>
+      </CardBody>
+    </Card>
+  );
+};
 
-                    <Controller
-                        name="documentType"
-                        control={control}
-                        rules={
-                            {
-                                required: 'Este campo es requerido'
-                            }
-                        }
-                        render={({ field }) => (
-
-                            <Select
-                                isInvalid={errors.documentType ? true : false}
-                                errorMessage={errors.documentType?.message}
-                                label="Seleccione el tipo de documento"
-                                placeholder="CEDULA DE CIUDADANIA"
-                                className="xs:col-span-12 col-span-4"
-                                {...field}
-                            >
-                                <SelectItem value={"CEDULA DE CIUDADANIA"} key={"CEDULA DE CIUDADANIA"}>CEDULA DE CIUDADANIA </SelectItem>
-                                <SelectItem value={"CEDULA EXTRANGERIA"} key={"CEDULA EXTRANGERIA"}>CEDULA EXTRANGERIA </SelectItem>
-                                <SelectItem value={"NIT"} key={"NIT"}>NIT </SelectItem>
-                            </Select>
-
-                        )}
-                    />
-
-                    <Input
-                        className="xs:col-span-12 col-span-4"
-                        label="Número"
-                        placeholder="1019098727"
-                        type="number"
-                        isInvalid={errors.document ? true : false}
-                        errorMessage={errors.document?.message}
-                        {...register('document', {
-                            required: "Este campo es requerido",
-                            minLength: {
-                                value: 5,
-                                message: "El campo debe tener como minimo 5 carateres"
-                            },
-                            maxLength: {
-                                value: 12,
-                                message: "El campo debe tener como maximo 12 caracteres"
-                            }
-                        })}
-                    />
-
-                    <Controller
-                        name="role"
-                        control={control}
-                        rules={
-                            {
-                                required: 'Este campo es requerido'
-                            }
-                        }
-                        render={({ field }) => (
-
-                            <Select
-                                isInvalid={errors.role ? true : false}
-                                errorMessage={errors.role?.message}
-                                label="Rol"
-                                placeholder="Seleccione el rol"
-                                className="xs:col-span-12 col-span-4"
-                                {...field}
-                            >
-                                <SelectItem value={"SUPER_ADMIN"} key={"SUPER_ADMIN"}>SUPER ADMINISTRADOR </SelectItem>
-                                <SelectItem value={"ADMIN"} key={"ADMIN"}>ADMINISTRADOR </SelectItem>
-                                <SelectItem value={"USER"} key={"USER"}>USUARIO </SelectItem>
-                            </Select>
-
-                        )}
-                    />
-
-                    <Input
-                        className="xs:col-span-12 col-span-4"
-                        label="Email"
-                        placeholder="joedoe@mail.com"
-                        type="text"
-                        isInvalid={errors.email ? true : false}
-                        errorMessage={errors.email?.message}
-                        {...register('email', {
-                            required: "Este campo es requerido",
-                            pattern: {
-                                value: /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
-                                message: 'El campo debe ser un email valido'
-                            }
-                        })}
-                    />
-                    <Input
-                        className="xs:col-span-12 col-span-4"
-                        label="Teléfono"
-                        placeholder="601 6586263"
-                        type="text"
-                        isInvalid={errors.phone ? true : false}
-                        errorMessage={errors.phone?.message}
-                        {...register('phone', {
-                            required: 'Este campo es requerido',
-                            minLength: {
-                                value: 7,
-                                message: 'se debe tener por lo menos 7 caracteres'
-                            },
-                            maxLength: {
-                                value: 12,
-                                message: 'se debe tener maximo 12 caracteres'
-                            },
-
-                        })}
-                    />
-
-                    <div className="xs:col-span-12 col-span-4">
-                        <FileUploader
-                            classes={{
-                                "drop_area": "bg-black"
-                            }}
-                            handleChange={(e: File) => {
-
-                                setImage(e)
-                                setValue("image", e)
-                            }}
-                            name="image"
-                            types={["jpeg", "png", "jpg"]}
-
-                        >
-                            <Input
-                                label="Foto de perfil"
-                                placeholder={image?.name ? image?.name : 'Seleccione su imagen'}
-                            />
-                        </FileUploader>
-                    </div>
-
-                    <div className="xs:col-span-12 col-span-4">
-                        <Controller
-                            name="status"
-                            control={control}
-
-                            render={({ field }) => (
-                                //@ts-ignore
-                                <Switch
-                                    {...field}
-                                    defaultSelected={true}
-                                >
-                                    Estado
-                                </Switch>
-                            )}
-                        />
-                    </div>
-
-                    <Button className="col-span-12" type="submit" color="primary"> Enviar</Button>
-
-                </form>
-
-            </CardBody>
-        </Card>
-    )
-}
-
-export default FormUser
+export default FormUser;

@@ -1,20 +1,24 @@
 import { axiosInstance } from "@/config/axiosInstance";
 import { SnackProps } from "@/config/snackbar";
 import { Client } from "@/interfaces/client";
+import { loaderOff, loaderOn } from "@/redux/slices/laoderSlice";
 import { Button, Input, Select, SelectItem, Checkbox, Switch } from "@nextui-org/react";
-import {  isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import { File } from "buffer";
 import { useSession } from "next-auth/react";
 import { enqueueSnackbar } from "notistack";
 import { FC, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import { Controller, FieldValues, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 
 
 
 const FormClient = () => {
 
     const { data: session } = useSession();
+
+    const dispatch = useDispatch();
 
     const { register, handleSubmit, control, formState: { errors }, setValue } = useForm<Client>({
         defaultValues: {
@@ -24,7 +28,7 @@ const FormClient = () => {
             email: "",
             image: undefined,
             isSubscription: false,
-            name: "hola",
+            name: "",
             package: "",
             payDay: undefined,
             payRate: undefined,
@@ -36,6 +40,7 @@ const FormClient = () => {
     const [image, setImage] = useState<File>()
 
     async function onSubmit(data: FieldValues) {
+        dispatch(loaderOn());
 
 
         let { image, ...rest } = data;
@@ -64,26 +69,31 @@ const FormClient = () => {
                         Authorization: session?.user.token
                     }
                 })
+
                 if (uploadImage.data) {
 
                     enqueueSnackbar('Cliente creado con exito', SnackProps('success'))
+                    dispatch(loaderOff());
                     return
                 } else {
+                    dispatch(loaderOff());
                     throw new Error()
                 }
 
 
             }
-
+            dispatch(loaderOff());
         } catch (error) {
             if (isAxiosError(error)) {
 
                 enqueueSnackbar(error.response?.data.message, SnackProps('error'))
+                dispatch(loaderOff());
                 return
             }
-
+            dispatch(loaderOff());
             enqueueSnackbar(error?.toString(), SnackProps('error'))
         }
+        dispatch(loaderOff());
 
     }
 
@@ -314,7 +324,7 @@ const FormClient = () => {
                         value: 6,
                         message: 'se debe tener por lo menos 6 caracteres'
                     }
-                    
+
                 })}
             />
 
