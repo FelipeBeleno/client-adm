@@ -61,12 +61,12 @@ const ComponentPage = () => {
             }
 
         },
-        [],
+        [paginate],
     );
 
     useEffect(() => {
         getData()
-    }, [])
+    }, [paginate])
 
 
 

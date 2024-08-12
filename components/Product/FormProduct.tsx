@@ -26,7 +26,11 @@ const FormProduct = () => {
     const getInfoComponents = useCallback(
         async () => {
             dispatch(loaderOn());
-            const { data } = await axiosInstance.get<ComponentResponse[]>(`component/${session?.user.clientId}`);
+            const { data } = await axiosInstance.get<ComponentResponse[]>(`component/${session?.user.clientId}`, {
+                headers: {
+                    Authorization: session?.user.token
+                }
+            });
 
             setComponents(data)
             dispatch(loaderOff());
